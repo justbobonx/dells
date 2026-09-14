@@ -9,6 +9,7 @@ function Cell(row, col) {
   this.wrong = false;
   this.locked = false;
   this.pond = false;
+  this.wolf = false;
 }
 
 Cell.prototype.setSprite = function (id) {

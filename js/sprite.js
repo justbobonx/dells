@@ -36,7 +36,8 @@ SpriteBank.prototype.get = function (id) {
 
 SpriteBank.defaults = function () {
   const bank = new SpriteBank();
-  bank.add(new Sprite("o", "O", "#f4f1e6", 0.82));
+  bank.add(new Sprite("o", "V", "#f4f1e6", 0.82));
+  bank.add(new Sprite("w", "W", "#f4f1e6", 0.82));
   bank.add(new Sprite("x", "X", "#2a2118", 0.42));
   return bank;
 };
