@@ -7,6 +7,7 @@ function Cell(row, col) {
   this.spriteId = null;
   this.guessId = null;
   this.wrong = false;
+  this.locked = false;
 }
 
 Cell.prototype.setSprite = function (id) {
@@ -18,11 +19,13 @@ Cell.prototype.clearSprite = function () {
 };
 
 Cell.prototype.setGuess = function (id) {
+  if (this.locked) return;
   this.guessId = id || null;
   this.wrong = false;
 };
 
 Cell.prototype.clearGuess = function () {
+  if (this.locked) return;
   this.guessId = null;
   this.wrong = false;
 };
