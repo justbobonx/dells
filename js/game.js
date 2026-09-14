@@ -22,7 +22,6 @@ const sprites = SpriteBank.defaults(function () {
 });
 const playChrome = new PlayChrome();
 const TAP_MS = 280;
-const SPRITE_PAD = 0.04;
 const POND_FILL = "#0D1E35";
 const POND_EDGE = "#15537F";
 const CAVE_FILL = "#222222";
@@ -217,7 +216,7 @@ function cellRadii(row, col, cell, rad) {
 
 function drawSprite(sprite, x, y, s) {
   if (!sprite) return;
-  const pad = Math.max(0, Math.floor(s * SPRITE_PAD));
+  const pad = Math.max(0, Math.floor(s * 0.06));
   sprite.draw(ctx, x + pad, y + pad, Math.max(1, s - pad * 2));
 }
 
