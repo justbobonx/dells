@@ -72,8 +72,8 @@ function paintScore() {
   elCleared.textContent = String(score.cleared);
   elRights.textContent = String(score.rights);
   elWrongs.textContent = String(score.wrongs);
-  if (grid) elOs.textContent = grid.guessOCount() + "/" + grid.n + " Os";
-  else elOs.textContent = "0/" + n + " Os";
+  if (grid) elOs.textContent = grid.guessOCount() + "/" + grid.n + " Vs";
+  else elOs.textContent = "0/" + n + " Vs";
 }
 
 function showBoard() {
@@ -158,7 +158,8 @@ function draw() {
       ctx.fillStyle = grid.dellColor(cell.dellId);
       fillRound(x, y, s, s, rad);
 
-      const sprite = sprites.get(cell.guessId);
+      const mark = cell.locked && cell.wolf && cell.guessId === "o" ? "w" : cell.guessId;
+      const sprite = sprites.get(mark);
       if (sprite) {
         const pad = Math.floor(s * 0.12);
         sprite.draw(ctx, x + pad, y + pad, s - pad * 2);
