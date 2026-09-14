@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DELLS</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <canvas id="board"></canvas>
+
+    <div id="hud">
+      <div class="hud-left">DELLS</div>
+      <div class="hud-right">
+        <label>N <input id="size" type="number" min="2" max="20" value="8" /></label>
+        <button id="btn-new" type="button">NEW</button>
+      </div>
+    </div>
+
+    <script src="js/sprite.js"></script>
+    <script src="js/cell.js"></script>
+    <script src="js/grid.js"></script>
+    <script src="js/game.js"></script>
+  </body>
+</html>
