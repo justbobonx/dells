@@ -1,6 +1,7 @@
 /** N x N cells. One O per row and column. Colors mark dells. */
 
-const MIN_DELL_SIZE = 3;
+const MIN_DELL_SIZE = 2;
+const DELL_TARGET = 3;
 const DELL_PAINT_TRIES = 40;
 const PLACE_TRIES = 200;
 const UNIQUE_TRIES = 250;
@@ -359,15 +360,17 @@ function shuffleInPlace(arr) {
 }
 
 Grid.prototype.paintDells = function () {
-  const minSize = Math.min(MIN_DELL_SIZE, this.n);
   for (let t = 0; t < DELL_PAINT_TRIES; t++) {
-    if (this.tryPaintDells(minSize)) return true;
+    if (this.tryPaintDells()) return true;
   }
   return false;
 };
 
-Grid.prototype.tryPaintDells = function (minSize) {
+Grid.prototype.tryPaintDells = function () {
   const n = this.n;
+  const floor = Math.min(MIN_DELL_SIZE, n);
+  const target = Math.min(DELL_TARGET, n);
+  const tinyQuota = Math.random() < 0.5 ? 2 : 1;
   const seeds = [];
   for (let r = 0; r < n; r++) {
     for (let c = 0; c < n; c++) {
@@ -396,11 +399,24 @@ Grid.prototype.tryPaintDells = function (minSize) {
 
   const self = this;
 
+  function shortCount() {
+    let count = 0;
+    for (let i = 0; i < sizes.length; i++) {
+      if (sizes[i] && sizes[i] < target) count++;
+    }
+    return count;
+  }
+
   function edges(hungry) {
+    const shorts = shortCount();
     const out = [];
     for (let i = 0; i < frontier.length; i++) {
       const f = frontier[i];
-      if (hungry && sizes[f.id] >= minSize) continue;
+      const sz = sizes[f.id] || 0;
+      if (hungry) {
+        if (sz >= target) continue;
+        if (sz >= floor && shorts <= tinyQuota) continue;
+      }
       const open = self.freeNeighbors(f.r, f.c);
       for (let k = 0; k < open.length; k++) {
         out.push({ r: open[k].r, c: open[k].c, id: f.id });
@@ -440,9 +456,13 @@ Grid.prototype.tryPaintDells = function (minSize) {
     if (!placed) return false;
   }
 
+  let tinies = 0;
   for (let i = 0; i < sizes.length; i++) {
-    if (sizes[i] < minSize) return false;
+    if (!sizes[i]) continue;
+    if (sizes[i] < floor) return false;
+    if (sizes[i] < target) tinies++;
   }
+  if (tinies > tinyQuota) return false;
   return new Solver(this).count(2) === 1;
 };
 
