@@ -16,7 +16,7 @@ const sprites = SpriteBank.defaults();
 const playChrome = new PlayChrome();
 const TAP_MS = 280;
 
-let n = 8;
+let n = Save.readSize();
 let grid = null;
 let cellSize = 48;
 let originX = 0;
@@ -31,7 +31,9 @@ function clamp(n, lo, hi) {
 }
 
 function readN() {
-  return clamp(parseInt(elSize.value, 10) || 8, 4, 20);
+  const size = clamp(parseInt(elSize.value, 10) || Save.readSize(), 4, 20);
+  Save.writeSize(size);
+  return size;
 }
 
 function layout() {
@@ -99,6 +101,7 @@ function restoreBoard() {
   if (!loaded) return false;
   grid = loaded;
   n = grid.n;
+  Save.writeSize(n);
   showBoard();
   return true;
 }
@@ -160,8 +163,8 @@ function draw() {
         sprite.draw(ctx, x + pad, y + pad, s - pad * 2);
       }
 
-      if (cell.wrong) {
-        ctx.strokeStyle = "#e23b3b";
+      if (cell.locked || cell.wrong) {
+        ctx.strokeStyle = cell.locked ? "#7dffa3" : "#e23b3b";
         ctx.lineWidth = Math.max(2, Math.floor(cellSize * 0.06));
         strokeRound(x + 1, y + 1, s - 2, s - 2, rad);
       }
@@ -186,6 +189,7 @@ function sameCell(a, b) {
 
 function applySingle(hit) {
   const cell = grid.at(hit.row, hit.col);
+  if (cell.locked) return;
   if (!cell.guessId) cell.setGuess("x");
   else cell.setGuess(null);
   paintScore();
@@ -195,6 +199,7 @@ function applySingle(hit) {
 
 function applyDouble(hit) {
   const cell = grid.at(hit.row, hit.col);
+  if (cell.locked) return;
   cell.setGuess("o");
   paintScore();
   persistBoard();
@@ -266,6 +271,7 @@ document.addEventListener("visibilitychange", function () {
 
 window.addEventListener("pagehide", persistBoard);
 
+elSize.value = String(n);
 paintScore();
 layout();
 draw();
