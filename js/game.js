@@ -1,11 +1,13 @@
 const canvas = document.getElementById("board");
 const ctx = canvas.getContext("2d");
-const elSize = document.getElementById("size");
+const elLevel = document.getElementById("level");
 const elOs = document.getElementById("os-count");
 const elCleared = document.getElementById("score-cleared");
 const elRights = document.getElementById("score-rights");
 const elWrongs = document.getElementById("score-wrongs");
+const btnMinus = document.getElementById("btn-minus");
 const btnNew = document.getElementById("btn-new");
+const btnPlus = document.getElementById("btn-plus");
 const btnCheck = document.getElementById("btn-check");
 const btnStart = document.getElementById("btn-start");
 const elStart = document.getElementById("start-screen");
@@ -30,10 +32,11 @@ function clamp(n, lo, hi) {
   return Math.max(lo, Math.min(hi, n));
 }
 
-function readN() {
-  const size = clamp(parseInt(elSize.value, 10) || Save.readSize(), 4, 20);
-  Save.writeSize(size);
-  return size;
+function setLevel(size) {
+  n = clamp(size, 4, 20);
+  Save.writeSize(n);
+  if (elLevel) elLevel.textContent = String(n);
+  return n;
 }
 
 function layout() {
@@ -78,7 +81,7 @@ function paintScore() {
 
 function showBoard() {
   hideWin();
-  elSize.value = String(n);
+  setLevel(n);
   paintScore();
   layout();
   draw();
@@ -86,8 +89,7 @@ function showBoard() {
 
 function newBoard() {
   hideWin();
-  n = readN();
-  elSize.value = String(n);
+  setLevel(n);
   grid = new Grid(n);
   grid.rebuild();
   persistBoard();
@@ -249,8 +251,18 @@ function checkBoard() {
 }
 
 btnStart.addEventListener("click", beginPlay);
+btnMinus.addEventListener("click", function () {
+  if (!playing) return;
+  setLevel(n - 1);
+  newBoard();
+});
 btnNew.addEventListener("click", function () {
   if (!playing) return;
+  newBoard();
+});
+btnPlus.addEventListener("click", function () {
+  if (!playing) return;
+  setLevel(n + 1);
   newBoard();
 });
 btnWinNew.addEventListener("click", function () {
@@ -258,10 +270,6 @@ btnWinNew.addEventListener("click", function () {
   newBoard();
 });
 btnCheck.addEventListener("click", checkBoard);
-elSize.addEventListener("change", function () {
-  if (!playing) return;
-  newBoard();
-});
 canvas.addEventListener("pointerdown", onBoardPointer);
 
 window.addEventListener("resize", function () {
@@ -275,7 +283,7 @@ document.addEventListener("visibilitychange", function () {
 
 window.addEventListener("pagehide", persistBoard);
 
-elSize.value = String(n);
+setLevel(n);
 paintScore();
 layout();
 draw();
