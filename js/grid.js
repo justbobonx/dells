@@ -71,25 +71,74 @@ Grid.prototype.clearGuesses = function () {
   }
 };
 
+Grid.prototype.guessOCount = function () {
+  let n = 0;
+  for (let r = 0; r < this.n; r++) {
+    for (let c = 0; c < this.n; c++) {
+      if (this.cells[r][c].guessId === "o") n++;
+    }
+  }
+  return n;
+};
+
 Grid.prototype.checkGuesses = function () {
   let win = true;
   let found = 0;
+  let rights = 0;
+  let wrongs = 0;
   for (let r = 0; r < this.n; r++) {
     for (let c = 0; c < this.n; c++) {
       const cell = this.cells[r][c];
       cell.wrong = false;
       if (cell.guessId === "o") {
-        if (cell.spriteId === "o") found++;
-        else {
+        if (cell.spriteId === "o") {
+          found++;
+          rights++;
+        } else {
           cell.wrong = true;
           win = false;
+          wrongs++;
         }
       } else if (cell.spriteId === "o") {
         win = false;
       }
     }
   }
-  return win && found === this.n;
+  return { win: win && found === this.n, rights: rights, wrongs: wrongs };
+};
+
+Grid.prototype.dump = function () {
+  const cells = [];
+  for (let r = 0; r < this.n; r++) {
+    for (let c = 0; c < this.n; c++) {
+      const cell = this.cells[r][c];
+      cells.push({
+        dellId: cell.dellId,
+        spriteId: cell.spriteId,
+        guessId: cell.guessId,
+        wrong: !!cell.wrong,
+      });
+    }
+  }
+  return { n: this.n, unique: this.unique, cells: cells };
+};
+
+Grid.load = function (data) {
+  if (!data || !data.n || !data.cells || data.cells.length !== data.n * data.n) return null;
+  const grid = new Grid(data.n);
+  grid.unique = !!data.unique;
+  let i = 0;
+  for (let r = 0; r < data.n; r++) {
+    for (let c = 0; c < data.n; c++) {
+      const src = data.cells[i++];
+      const cell = grid.cells[r][c];
+      cell.dellId = src.dellId;
+      cell.spriteId = src.spriteId || null;
+      cell.guessId = src.guessId || null;
+      cell.wrong = !!src.wrong;
+    }
+  }
+  return grid;
 };
 
 Grid.prototype.hasNearbyO = function (row, col) {
