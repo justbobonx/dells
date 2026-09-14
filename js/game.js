@@ -5,6 +5,8 @@ const elCleared = document.getElementById("score-cleared");
 const elRights = document.getElementById("score-rights");
 const elWrongs = document.getElementById("score-wrongs");
 const btnMenu = document.getElementById("btn-menu");
+const btnReset = document.getElementById("btn-reset");
+const btnHint = document.getElementById("btn-hint");
 const btnNewMinus = document.getElementById("btn-new-minus");
 const btnNew = document.getElementById("btn-new");
 const btnNewPlus = document.getElementById("btn-new-plus");
@@ -116,6 +118,22 @@ function newBoard() {
   grid.rebuild();
   persistBoard();
   showBoard();
+}
+
+function resetBoard() {
+  if (!playing || !grid) return;
+  hideWin();
+  hideMenu();
+  for (let r = 0; r < grid.n; r++) {
+    for (let c = 0; c < grid.n; c++) grid.at(r, c).resetMarks();
+  }
+  persistBoard();
+  paintScore();
+  draw();
+}
+
+function giveHint() {
+  if (!playing || !grid) return;
 }
 
 function restoreBoard() {
@@ -319,6 +337,11 @@ btnMenu.addEventListener("click", function () {
   if (!playing) return;
   if (menuOpen()) hideMenu();
   else showMenu();
+});
+btnReset.addEventListener("click", resetBoard);
+btnHint.addEventListener("click", function () {
+  hideMenu();
+  giveHint();
 });
 btnNewMinus.addEventListener("click", function () {
   if (!playing) return;

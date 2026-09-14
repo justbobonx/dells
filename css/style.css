@@ -117,6 +117,12 @@ canvas {
   padding-bottom: max(72px, calc(56px + env(safe-area-inset-bottom)));
 }
 
+#menu-screen {
+  align-items: flex-end;
+  justify-content: flex-start;
+  padding: 0 16px max(72px, calc(56px + env(safe-area-inset-bottom))) max(16px, env(safe-area-inset-left));
+}
+
 .start-panel,
 .panel {
   text-align: center;
@@ -215,6 +221,22 @@ canvas {
 .menu-panel {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  min-width: 160px;
+  gap: 10px;
+  min-width: 0;
+  padding: 14px;
+}
+
+.menu-row {
+  display: flex;
+  gap: 8px;
+}
+
+.menu-row button {
+  flex: 1;
+}
+
+#btn-new-minus,
+#btn-new-plus {
+  flex: 0 0 44px;
+  padding: 10px 0;
 }

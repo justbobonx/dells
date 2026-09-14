@@ -31,3 +31,9 @@ Cell.prototype.clearGuess = function () {
   this.guessId = null;
   this.wrong = false;
 };
+
+Cell.prototype.resetMarks = function () {
+  this.guessId = null;
+  this.wrong = false;
+  this.locked = false;
+};
