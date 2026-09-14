@@ -144,7 +144,6 @@ Grid.prototype.paintDells = function () {
 };
 
 Grid.prototype.tryPaintDells = function (minSize) {
-  this.backs = 0;
   const n = this.n;
   const seeds = [];
   for (let r = 0; r < n; r++) {
