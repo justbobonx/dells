@@ -19,8 +19,8 @@ const sprites = SpriteBank.defaults(function () {
 });
 const playChrome = new PlayChrome();
 const TAP_MS = 280;
-const POND_FILL = "#0a1628";
-const POND_EDGE = "#3d8ec8";
+const POND_FILL = "#0D1E35";
+const POND_EDGE = "#15537F";
 
 let n = Save.readSize();
 let grid = null;
