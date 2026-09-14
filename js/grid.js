@@ -89,6 +89,47 @@ Grid.prototype.placePond = function () {
   return true;
 };
 
+Grid.prototype.clearWolves = function () {
+  for (let r = 0; r < this.n; r++) {
+    for (let c = 0; c < this.n; c++) this.cells[r][c].wolf = false;
+  }
+};
+
+Grid.prototype.findWolf = function () {
+  for (let r = 0; r < this.n; r++) {
+    for (let c = 0; c < this.n; c++) {
+      if (this.cells[r][c].wolf) return this.cells[r][c];
+    }
+  }
+  return null;
+};
+
+/** 8+: half the time. One solution O with Chebyshev keep-out 2. */
+Grid.prototype.placeWolf = function () {
+  this.clearWolves();
+  if (this.n < 8) return false;
+  if (Math.random() >= 0.5) return false;
+  const opts = [];
+  for (let r = 0; r < this.n; r++) {
+    for (let c = 0; c < this.n; c++) {
+      if (!this.cells[r][c].pond) opts.push({ r: r, c: c });
+    }
+  }
+  if (!opts.length) return false;
+  const pick = opts[Math.floor(Math.random() * opts.length)];
+  const cell = this.cells[pick.r][pick.c];
+  cell.wolf = true;
+  cell.setSprite("o");
+  return true;
+};
+
+Grid.prototype.nearWolf = function (row, col) {
+  const wolf = this.findWolf();
+  if (!wolf) return false;
+  if (wolf.row === row && wolf.col === col) return false;
+  return Math.max(Math.abs(row - wolf.row), Math.abs(col - wolf.col)) <= 2;
+};
+
 Grid.prototype.setSprite = function (row, col, id) {
   this.cells[row][col].setSprite(id);
 };
@@ -149,6 +190,7 @@ Grid.prototype.dump = function () {
         wrong: !!cell.wrong,
         locked: !!cell.locked,
         pond: !!cell.pond,
+        wolf: !!cell.wolf,
       });
     }
   }
@@ -170,6 +212,7 @@ Grid.load = function (data) {
       cell.wrong = !!src.wrong;
       cell.locked = !!src.locked;
       cell.pond = !!src.pond;
+      cell.wolf = !!src.wolf;
     }
   }
   return grid;
@@ -200,11 +243,20 @@ Grid.prototype.placeOs = function () {
 };
 
 Grid.prototype.tryPlaceOs = function () {
+  const wolf = this.findWolf();
   this.clearSprites();
+  if (wolf) {
+    wolf.wolf = true;
+    wolf.setSprite("o");
+  }
   const rows = [];
   const cols = [];
   for (let i = 0; i < this.n; i++) {
+    if (wolf && i === wolf.row) continue;
     rows.push(i);
+  }
+  for (let i = 0; i < this.n; i++) {
+    if (wolf && i === wolf.col) continue;
     cols.push(i);
   }
   while (rows.length) {
@@ -212,6 +264,7 @@ Grid.prototype.tryPlaceOs = function () {
     for (let i = 0; i < rows.length; i++) {
       for (let j = 0; j < cols.length; j++) {
         if (this.cells[rows[i]][cols[j]].pond) continue;
+        if (this.nearWolf(rows[i], cols[j])) continue;
         if (!this.hasNearbyO(rows[i], cols[j])) {
           opts.push({ i: i, j: j });
         }
@@ -336,6 +389,8 @@ Grid.prototype.tryPaintDells = function (minSize) {
 };
 
 Grid.prototype.dellColor = function (dellId) {
+  const wolf = this.findWolf();
+  if (wolf && wolf.dellId === dellId) return "#7c7c7c";
   return DELL_COLORS[((dellId % DELL_COLORS.length) + DELL_COLORS.length) % DELL_COLORS.length];
 };
 
@@ -346,6 +401,7 @@ Grid.prototype.rebuild = function () {
   for (let t = 0; t < UNIQUE_TRIES; t++) {
     this.tries++;
     this.placePond();
+    this.placeWolf();
     this.placeOs();
     this.paintDells();
     if (new Solver(this).count(2) === 1) {
