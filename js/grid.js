@@ -89,18 +89,20 @@ Grid.prototype.checkGuesses = function () {
   for (let r = 0; r < this.n; r++) {
     for (let c = 0; c < this.n; c++) {
       const cell = this.cells[r][c];
-      cell.wrong = false;
       if (cell.guessId === "o") {
         if (cell.spriteId === "o") {
           found++;
-          rights++;
+          if (!cell.locked) rights++;
+          cell.locked = true;
+          cell.wrong = false;
         } else {
           cell.wrong = true;
           win = false;
           wrongs++;
         }
-      } else if (cell.spriteId === "o") {
-        win = false;
+      } else {
+        cell.wrong = false;
+        if (cell.spriteId === "o") win = false;
       }
     }
   }
@@ -117,6 +119,7 @@ Grid.prototype.dump = function () {
         spriteId: cell.spriteId,
         guessId: cell.guessId,
         wrong: !!cell.wrong,
+        locked: !!cell.locked,
       });
     }
   }
@@ -136,6 +139,7 @@ Grid.load = function (data) {
       cell.spriteId = src.spriteId || null;
       cell.guessId = src.guessId || null;
       cell.wrong = !!src.wrong;
+      cell.locked = !!src.locked;
     }
   }
   return grid;
