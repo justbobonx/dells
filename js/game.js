@@ -22,6 +22,7 @@ const sprites = SpriteBank.defaults(function () {
 });
 const playChrome = new PlayChrome();
 const TAP_MS = 280;
+const SPRITE_PAD = 0.04;
 const POND_FILL = "#0D1E35";
 const POND_EDGE = "#15537F";
 const CAVE_FILL = "#222222";
@@ -213,6 +214,12 @@ function cellRadii(row, col, cell, rad) {
   ];
 }
 
+function drawSprite(sprite, x, y, s) {
+  if (!sprite) return;
+  const pad = Math.max(0, Math.floor(s * SPRITE_PAD));
+  sprite.draw(ctx, x + pad, y + pad, Math.max(1, s - pad * 2));
+}
+
 function draw() {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.imageSmoothingEnabled = false;
@@ -248,16 +255,14 @@ function draw() {
         ctx.lineWidth = waterW;
         strokeRound(x + 1, y + 1, s - 2, s - 2, corners);
         const mark = cell.guessId === "x" ? "xl" : cell.guessId;
-        const sprite = sprites.get(mark);
-        if (sprite) sprite.draw(ctx, x, y, s);
+        drawSprite(sprites.get(mark), x, y, s);
         continue;
       }
 
       ctx.fillStyle = grid.dellColor(cell.dellId);
       fillRound(x, y, s, s, corners);
 
-      const sprite = sprites.get(cell.guessId);
-      if (sprite) sprite.draw(ctx, x, y, s);
+      drawSprite(sprites.get(cell.guessId), x, y, s);
 
       if (cell.locked || cell.wrong) {
         ctx.strokeStyle = cell.locked ? "#7dffa3" : "#e23b3b";
