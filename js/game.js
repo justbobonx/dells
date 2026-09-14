@@ -24,8 +24,8 @@ const playChrome = new PlayChrome();
 const TAP_MS = 280;
 const POND_FILL = "#0D1E35";
 const POND_EDGE = "#15537F";
-const CAVE_FILL = "#1a1a1a";
-const CAVE_EDGE = "#8a8a8a";
+const CAVE_FILL = "#222222";
+const CAVE_EDGE = "#777777";
 
 let n = Save.readSize();
 let grid = null;
