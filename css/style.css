@@ -45,6 +45,11 @@ canvas {
   align-items: center;
 }
 
+.hud-right strong {
+  color: #7dffb3;
+  font-size: 16px;
+}
+
 .hud-right label {
   letter-spacing: 0.08em;
 }

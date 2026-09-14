@@ -3,6 +3,7 @@
 const MIN_DELL_SIZE = 3;
 const DELL_PAINT_TRIES = 40;
 const PLACE_TRIES = 200;
+const UNIQUE_TRIES = 250;
 
 const DELL_DIRS = [
   [0, 1],
@@ -36,6 +37,8 @@ const DELL_COLORS = [
 
 function Grid(n) {
   this.n = n;
+  this.tries = 0;
+  this.unique = false;
   this.cells = [];
   for (let r = 0; r < n; r++) {
     const row = [];
@@ -191,6 +194,16 @@ Grid.prototype.dellColor = function (dellId) {
 };
 
 Grid.prototype.rebuild = function () {
-  this.placeOs();
-  this.paintDells();
+  this.unique = false;
+  this.tries = 0;
+  for (let t = 0; t < UNIQUE_TRIES; t++) {
+    this.tries++;
+    this.placeOs();
+    this.paintDells();
+    if (new Solver(this).count(2) === 1) {
+      this.unique = true;
+      return true;
+    }
+  }
+  return false;
 };
