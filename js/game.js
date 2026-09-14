@@ -152,11 +152,11 @@ function onBoardPointer(e) {
     applyDouble(hit);
     return;
   }
+  applySingle(hit);
   if (tapTimer) clearTimeout(tapTimer);
   tapCell = hit;
   tapTimer = setTimeout(function () {
     tapTimer = 0;
-    applySingle(hit);
     tapCell = null;
   }, TAP_MS);
 }
