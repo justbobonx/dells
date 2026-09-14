@@ -398,25 +398,42 @@ Grid.prototype.tryPaintDells = function () {
   }
 
   const self = this;
+  const reserved2 = {};
+  const reserved3 = {};
+  let reserved = false;
 
-  function shortCount() {
+  function countSize(cap, exact) {
     let count = 0;
     for (let i = 0; i < sizes.length; i++) {
-      if (sizes[i] && sizes[i] < target) count++;
+      if (!sizes[i]) continue;
+      if (exact && sizes[i] === cap) count++;
+      else if (!exact && sizes[i] < cap) count++;
     }
     return count;
   }
 
-  function edges(hungry) {
-    const shorts = shortCount();
+  function lockReserved() {
+    if (reserved) return;
+    reserved = true;
+    const twos = [];
+    const threes = [];
+    for (let i = 0; i < sizes.length; i++) {
+      if (sizes[i] === floor) twos.push(i);
+      if (sizes[i] === target) threes.push(i);
+    }
+    shuffleInPlace(twos);
+    shuffleInPlace(threes);
+    const keep2 = Math.min(tinyQuota, twos.length);
+    for (let i = 0; i < keep2; i++) reserved2[twos[i]] = true;
+    const keep3 = Math.max(0, 3 - keep2);
+    for (let i = 0; i < threes.length && i < keep3; i++) reserved3[threes[i]] = true;
+  }
+
+  function edgesFrom(allow) {
     const out = [];
     for (let i = 0; i < frontier.length; i++) {
       const f = frontier[i];
-      const sz = sizes[f.id] || 0;
-      if (hungry) {
-        if (sz >= target) continue;
-        if (sz >= floor && shorts <= tinyQuota) continue;
-      }
+      if (!allow(f.id, sizes[f.id] || 0)) continue;
       const open = self.freeNeighbors(f.r, f.c);
       for (let k = 0; k < open.length; k++) {
         out.push({ r: open[k].r, c: open[k].c, id: f.id });
@@ -426,17 +443,28 @@ Grid.prototype.tryPaintDells = function () {
   }
 
   function nextOpts() {
-    const hungry = edges(true);
-    if (hungry.length) return hungry;
-    const all = edges(false);
-    const big = [];
-    const small = [];
-    for (let i = 0; i < all.length; i++) {
-      if ((sizes[all[i].id] || 0) >= target) big.push(all[i]);
-      else small.push(all[i]);
+    if (countSize(floor, false)) {
+      return edgesFrom(function (id, sz) {
+        return sz < floor;
+      });
     }
-    if (big.length) return big;
-    return small;
+    if (countSize(target, false) > tinyQuota) {
+      return edgesFrom(function (id, sz) {
+        return sz < target;
+      });
+    }
+    lockReserved();
+    const rest = edgesFrom(function (id, sz) {
+      return !reserved2[id] && !reserved3[id];
+    });
+    if (rest.length) return rest;
+    const grow3 = edgesFrom(function (id) {
+      return !!reserved3[id];
+    });
+    if (grow3.length) return grow3;
+    return edgesFrom(function (id) {
+      return !!reserved2[id];
+    });
   }
 
   function unclaimed() {
