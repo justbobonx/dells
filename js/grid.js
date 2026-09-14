@@ -61,6 +61,34 @@ Grid.prototype.clearSprites = function () {
   }
 };
 
+Grid.prototype.clearPonds = function () {
+  for (let r = 0; r < this.n; r++) {
+    for (let c = 0; c < this.n; c++) this.cells[r][c].pond = false;
+  }
+};
+
+/** 6: none. 7+: half the time a 2x2 or 2x3 (either way). */
+Grid.prototype.placePond = function () {
+  this.clearPonds();
+  if (this.n < 7) return false;
+  if (Math.random() >= 0.5) return false;
+  const shapes = [
+    [2, 2],
+    [2, 3],
+    [3, 2],
+  ];
+  const shape = shapes[Math.floor(Math.random() * shapes.length)];
+  const h = shape[0];
+  const w = shape[1];
+  if (h > this.n || w > this.n) return false;
+  const r0 = Math.floor(Math.random() * (this.n - h + 1));
+  const c0 = Math.floor(Math.random() * (this.n - w + 1));
+  for (let r = r0; r < r0 + h; r++) {
+    for (let c = c0; c < c0 + w; c++) this.cells[r][c].pond = true;
+  }
+  return true;
+};
+
 Grid.prototype.setSprite = function (row, col, id) {
   this.cells[row][col].setSprite(id);
 };
@@ -120,6 +148,7 @@ Grid.prototype.dump = function () {
         guessId: cell.guessId,
         wrong: !!cell.wrong,
         locked: !!cell.locked,
+        pond: !!cell.pond,
       });
     }
   }
@@ -140,6 +169,7 @@ Grid.load = function (data) {
       cell.guessId = src.guessId || null;
       cell.wrong = !!src.wrong;
       cell.locked = !!src.locked;
+      cell.pond = !!src.pond;
     }
   }
   return grid;
@@ -181,6 +211,7 @@ Grid.prototype.tryPlaceOs = function () {
     const opts = [];
     for (let i = 0; i < rows.length; i++) {
       for (let j = 0; j < cols.length; j++) {
+        if (this.cells[rows[i]][cols[j]].pond) continue;
         if (!this.hasNearbyO(rows[i], cols[j])) {
           opts.push({ i: i, j: j });
         }
@@ -201,6 +232,7 @@ Grid.prototype.freeNeighbors = function (row, col) {
     const nr = row + DELL_DIRS[d][0];
     const nc = col + DELL_DIRS[d][1];
     if (nr < 0 || nc < 0 || nr >= this.n || nc >= this.n) continue;
+    if (this.cells[nr][nc].pond) continue;
     if (this.cells[nr][nc].dellId !== -1) continue;
     out.push({ r: nr, c: nc });
   }
@@ -237,7 +269,9 @@ Grid.prototype.tryPaintDells = function (minSize) {
   if (!seeds.length) return false;
 
   for (let r = 0; r < n; r++) {
-    for (let c = 0; c < n; c++) this.cells[r][c].dellId = -1;
+    for (let c = 0; c < n; c++) {
+      this.cells[r][c].dellId = this.cells[r][c].pond ? -2 : -1;
+    }
   }
 
   const sizes = [];
@@ -311,6 +345,7 @@ Grid.prototype.rebuild = function () {
   this.backs = 0;
   for (let t = 0; t < UNIQUE_TRIES; t++) {
     this.tries++;
+    this.placePond();
     this.placeOs();
     this.paintDells();
     if (new Solver(this).count(2) === 1) {
