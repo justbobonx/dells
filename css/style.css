@@ -92,21 +92,6 @@ canvas {
   background: #34744a;
 }
 
-#btn-menu {
-  width: 40px;
-  height: 36px;
-  padding: 8px 9px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-#btn-menu span {
-  display: block;
-  height: 2px;
-  background: #7dffb3;
-}
-
 .overlay {
   position: fixed;
   inset: 0;
@@ -123,7 +108,7 @@ canvas {
 
 #win-screen,
 #menu-screen {
-  background: rgba(17, 17, 17, 0.72);
+  background: rgba(17, 17, 17, 0.12);
 }
 
 .start-panel,
