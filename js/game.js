@@ -164,8 +164,8 @@ function draw() {
       }
 
       if (cell.locked || cell.wrong) {
-        ctx.strokeStyle = cell.locked ? "#7dffa3" : "#e23b3b";
-        ctx.lineWidth = Math.max(2, Math.floor(cellSize * 0.06));
+        ctx.strokeStyle = cell.locked ? "#00EB46" : "#e23b3b";
+        ctx.lineWidth = Math.max(2, Math.floor(cellSize * 0.04));
         strokeRound(x + 1, y + 1, s - 2, s - 2, rad);
       }
     }
