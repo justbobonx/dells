@@ -425,6 +425,20 @@ Grid.prototype.tryPaintDells = function () {
     return out;
   }
 
+  function nextOpts() {
+    const hungry = edges(true);
+    if (hungry.length) return hungry;
+    const all = edges(false);
+    const big = [];
+    const small = [];
+    for (let i = 0; i < all.length; i++) {
+      if ((sizes[all[i].id] || 0) >= target) big.push(all[i]);
+      else small.push(all[i]);
+    }
+    if (big.length) return big;
+    return small;
+  }
+
   function unclaimed() {
     for (let r = 0; r < n; r++) {
       for (let c = 0; c < n; c++) {
@@ -435,8 +449,7 @@ Grid.prototype.tryPaintDells = function () {
   }
 
   while (unclaimed()) {
-    let opts = edges(true);
-    if (!opts.length) opts = edges(false);
+    const opts = nextOpts();
     if (!opts.length) return false;
     shuffleInPlace(opts);
     let placed = false;
@@ -456,13 +469,9 @@ Grid.prototype.tryPaintDells = function () {
     if (!placed) return false;
   }
 
-  let tinies = 0;
   for (let i = 0; i < sizes.length; i++) {
-    if (!sizes[i]) continue;
-    if (sizes[i] < floor) return false;
-    if (sizes[i] < target) tinies++;
+    if (sizes[i] && sizes[i] < floor) return false;
   }
-  if (tinies > tinyQuota) return false;
   return new Solver(this).count(2) === 1;
 };
 
