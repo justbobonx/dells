@@ -6,26 +6,26 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <title>foxes</title>
-    <link rel="stylesheet" href="css/style.css?v=15" />
+    <link rel="stylesheet" href="css/style.css?v=16" />
   </head>
   <body>
     <canvas id="board"></canvas>
 
     <div id="hud">
-      <div class="hud-left">
-        <button id="btn-menu" type="button">MENU</button>
-      </div>
-      <div class="hud-right">
-        <button id="btn-check" type="button">CHECK</button>
-      </div>
-    </div>
-
-    <div id="hud-bottom">
       <div class="hud-left"><span id="os-count">0/6</span></div>
       <div class="hud-right">
         <span>CLEARED <strong id="score-cleared">0</strong></span>
         <span>RIGHT <strong id="score-rights" class="good">0</strong></span>
         <span>WRONG <strong id="score-wrongs" class="bad">0</strong></span>
+      </div>
+    </div>
+
+    <div id="hud-bottom">
+      <div class="hud-left">
+        <button id="btn-menu" type="button">MENU</button>
+      </div>
+      <div class="hud-right">
+        <button id="btn-check" type="button">CHECK</button>
       </div>
     </div>
 
@@ -50,18 +50,18 @@
     </div>
 
     <div id="win-screen" class="overlay" hidden>
-      <div class="panel">
+      <div class="panel win-panel">
         <h1>WIN</h1>
-        <button id="btn-win-new" type="button">NEW</button>
+        <button id="btn-win-new" type="button">NEXT</button>
       </div>
     </div>
 
-    <script src="js/sprite.js?v=15"></script>
-    <script src="js/cell.js?v=15"></script>
-    <script src="js/grid.js?v=15"></script>
-    <script src="js/solver.js?v=15"></script>
-    <script src="js/save.js?v=15"></script>
-    <script src="js/chrome.js?v=15"></script>
-    <script src="js/game.js?v=15"></script>
+    <script src="js/sprite.js?v=16"></script>
+    <script src="js/cell.js?v=16"></script>
+    <script src="js/grid.js?v=16"></script>
+    <script src="js/solver.js?v=16"></script>
+    <script src="js/save.js?v=16"></script>
+    <script src="js/chrome.js?v=16"></script>
+    <script src="js/game.js?v=16"></script>
   </body>
 </html>

@@ -64,8 +64,9 @@ function layout() {
   if (cellSize < 16) cellSize = 16;
   const boardW = size * cellSize;
   const boardH = size * cellSize;
+  const slack = Math.max(0, usableH - boardH);
   originX = Math.floor((w - boardW) / 2);
-  originY = Math.floor(padTop + (usableH - boardH) / 2);
+  originY = Math.floor(padTop + slack / 3);
 }
 
 function hideWin() {

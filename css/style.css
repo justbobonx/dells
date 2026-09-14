@@ -88,7 +88,8 @@ canvas {
   cursor: pointer;
 }
 
-#hud button:hover {
+#hud button:hover,
+#hud-bottom button:hover {
   background: #34744a;
 }
 
@@ -109,6 +110,11 @@ canvas {
 #win-screen,
 #menu-screen {
   background: rgba(17, 17, 17, 0.12);
+}
+
+#win-screen {
+  align-items: flex-end;
+  padding-bottom: max(72px, calc(56px + env(safe-area-inset-bottom)));
 }
 
 .start-panel,
@@ -148,6 +154,11 @@ canvas {
   margin-bottom: 18px;
 }
 
+.win-panel h1 {
+  margin: 0 0 12px;
+  font-size: 28px;
+}
+
 #btn-start {
   display: block;
   margin: 0 auto;
@@ -184,6 +195,10 @@ canvas {
   padding: 28px 36px;
   background: #12151c;
   border: 1px solid #2a3140;
+}
+
+.win-panel {
+  padding: 16px 28px 18px;
 }
 
 .panel button {
