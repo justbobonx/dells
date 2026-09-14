@@ -123,13 +123,23 @@ Grid.prototype.freeNeighbors = function (row, col) {
   return out;
 };
 
-/** Dummy dells. One free neighbor per turn. Hungry dells eat first. */
+function shuffleInPlace(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = tmp;
+  }
+  return arr;
+}
+
+/** Grow dells one cell at a time. Keep only claims that leave exactly one solution. */
 Grid.prototype.paintDells = function () {
   const minSize = Math.min(MIN_DELL_SIZE, this.n);
   for (let t = 0; t < DELL_PAINT_TRIES; t++) {
-    if (this.tryPaintDells(minSize)) return;
+    if (this.tryPaintDells(minSize)) return true;
   }
-  this.tryPaintDells(1);
+  return false;
 };
 
 Grid.prototype.tryPaintDells = function (minSize) {
@@ -155,38 +165,55 @@ Grid.prototype.tryPaintDells = function (minSize) {
     frontier.push({ r: s.r, c: s.c, id: i });
   }
 
-  function growable(list, grid, hungry) {
-    const hits = [];
-    for (let i = 0; i < list.length; i++) {
-      const f = list[i];
+  const self = this;
+
+  function edges(hungry) {
+    const out = [];
+    for (let i = 0; i < frontier.length; i++) {
+      const f = frontier[i];
       if (hungry && sizes[f.id] >= minSize) continue;
-      if (!grid.freeNeighbors(f.r, f.c).length) continue;
-      hits.push(i);
+      const open = self.freeNeighbors(f.r, f.c);
+      for (let k = 0; k < open.length; k++) {
+        out.push({ r: open[k].r, c: open[k].c, id: f.id });
+      }
     }
-    return hits;
+    return out;
   }
 
-  while (true) {
-    let hits = growable(frontier, this, true);
-    if (!hits.length) hits = growable(frontier, this, false);
-    if (!hits.length) break;
-    const cur = frontier[hits[Math.floor(Math.random() * hits.length)]];
-    const open = this.freeNeighbors(cur.r, cur.c);
-    const take = open[Math.floor(Math.random() * open.length)];
-    this.cells[take.r][take.c].dellId = cur.id;
-    sizes[cur.id]++;
-    frontier.push({ r: take.r, c: take.c, id: cur.id });
+  function unclaimed() {
+    for (let r = 0; r < n; r++) {
+      for (let c = 0; c < n; c++) {
+        if (self.cells[r][c].dellId === -1) return true;
+      }
+    }
+    return false;
   }
 
-  for (let r = 0; r < n; r++) {
-    for (let c = 0; c < n; c++) {
-      if (this.cells[r][c].dellId === -1) return false;
+  while (unclaimed()) {
+    let opts = edges(true);
+    if (!opts.length) opts = edges(false);
+    if (!opts.length) return false;
+    shuffleInPlace(opts);
+    let placed = false;
+    for (let i = 0; i < opts.length; i++) {
+      const e = opts[i];
+      if (this.cells[e.r][e.c].dellId !== -1) continue;
+      this.cells[e.r][e.c].dellId = e.id;
+      if (new Solver(this).count(2) === 1) {
+        sizes[e.id]++;
+        frontier.push({ r: e.r, c: e.c, id: e.id });
+        placed = true;
+        break;
+      }
+      this.cells[e.r][e.c].dellId = -1;
     }
+    if (!placed) return false;
   }
+
   for (let i = 0; i < sizes.length; i++) {
     if (sizes[i] < minSize) return false;
   }
-  return true;
+  return new Solver(this).count(2) === 1;
 };
 
 Grid.prototype.dellColor = function (dellId) {
