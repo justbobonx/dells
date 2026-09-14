@@ -18,6 +18,8 @@ canvas {
   height: 100%;
   background: #111;
   touch-action: none;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 
 #hud,
