@@ -19,6 +19,8 @@ const sprites = SpriteBank.defaults(function () {
 });
 const playChrome = new PlayChrome();
 const TAP_MS = 280;
+const POND_FILL = "#0a1628";
+const POND_EDGE = "#3d8ec8";
 
 let n = Save.readSize();
 let grid = null;
@@ -158,17 +160,18 @@ function strokeRound(x, y, w, h, rad) {
   ctx.strokeRect(x, y, w, h);
 }
 
-function sameDell(row, col, dellId) {
+function samePatch(row, col, cell) {
   if (row < 0 || col < 0 || row >= grid.n || col >= grid.n) return false;
   const other = grid.at(row, col);
-  return !other.pond && other.dellId === dellId;
+  if (cell.pond) return !!other.pond;
+  return !other.pond && other.dellId === cell.dellId;
 }
 
-function cellRadii(row, col, dellId, rad) {
-  const up = sameDell(row - 1, col, dellId);
-  const down = sameDell(row + 1, col, dellId);
-  const left = sameDell(row, col - 1, dellId);
-  const right = sameDell(row, col + 1, dellId);
+function cellRadii(row, col, cell, rad) {
+  const up = samePatch(row - 1, col, cell);
+  const down = samePatch(row + 1, col, cell);
+  const left = samePatch(row, col - 1, cell);
+  const right = samePatch(row, col + 1, cell);
   return [
     up || left ? 0 : rad,
     up || right ? 0 : rad,
@@ -186,16 +189,27 @@ function draw() {
 
   const inset = Math.max(1, Math.floor(cellSize * 0.06));
   const rad = Math.max(4, Math.floor(cellSize * 0.16));
+  const checkW = Math.max(2, Math.floor(cellSize * 0.06));
+  const waterW = Math.max(1, Math.floor(checkW * 0.45));
   const wolf = grid.findWolf();
   const wolfDell = wolf ? wolf.dellId : -1;
   for (let r = 0; r < grid.n; r++) {
     for (let c = 0; c < grid.n; c++) {
       const cell = grid.at(r, c);
-      if (cell.pond) continue;
       const x = originX + c * cellSize + inset;
       const y = originY + r * cellSize + inset;
       const s = cellSize - inset * 2;
-      const corners = cellRadii(r, c, cell.dellId, rad);
+      const corners = cellRadii(r, c, cell, rad);
+
+      if (cell.pond) {
+        ctx.fillStyle = POND_FILL;
+        fillRound(x, y, s, s, corners);
+        ctx.strokeStyle = POND_EDGE;
+        ctx.lineWidth = waterW;
+        strokeRound(x + 1, y + 1, s - 2, s - 2, corners);
+        continue;
+      }
+
       ctx.fillStyle = grid.dellColor(cell.dellId);
       fillRound(x, y, s, s, corners);
 
@@ -205,7 +219,7 @@ function draw() {
 
       if (cell.locked || cell.wrong) {
         ctx.strokeStyle = cell.locked ? "#7dffa3" : "#e23b3b";
-        ctx.lineWidth = Math.max(2, Math.floor(cellSize * 0.06));
+        ctx.lineWidth = checkW;
         strokeRound(x + 1, y + 1, s - 2, s - 2, corners);
       }
     }
