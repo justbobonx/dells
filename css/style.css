@@ -78,3 +78,42 @@ canvas {
 .hud-right button:hover {
   background: #34744a;
 }
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(14, 20, 16, 0.72);
+}
+
+.overlay[hidden] {
+  display: none;
+}
+
+.panel {
+  text-align: center;
+  padding: 28px 36px;
+  background: #12151c;
+  border: 1px solid #2a3140;
+}
+
+.panel h1 {
+  margin: 0 0 18px;
+  letter-spacing: 0.22em;
+  font-size: 42px;
+  color: #7dffb3;
+}
+
+.panel button {
+  background: #2a5a3a;
+  color: #e8eef7;
+  border: 1px solid #7dffb3;
+  padding: 10px 22px;
+  letter-spacing: 0.16em;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}

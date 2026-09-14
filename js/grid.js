@@ -54,12 +54,42 @@ Grid.prototype.at = function (row, col) {
 
 Grid.prototype.clearSprites = function () {
   for (let r = 0; r < this.n; r++) {
-    for (let c = 0; c < this.n; c++) this.cells[r][c].clearSprite();
+    for (let c = 0; c < this.n; c++) {
+      this.cells[r][c].clearSprite();
+      this.cells[r][c].clearGuess();
+    }
   }
 };
 
 Grid.prototype.setSprite = function (row, col, id) {
   this.cells[row][col].setSprite(id);
+};
+
+Grid.prototype.clearGuesses = function () {
+  for (let r = 0; r < this.n; r++) {
+    for (let c = 0; c < this.n; c++) this.cells[r][c].clearGuess();
+  }
+};
+
+Grid.prototype.checkGuesses = function () {
+  let win = true;
+  let found = 0;
+  for (let r = 0; r < this.n; r++) {
+    for (let c = 0; c < this.n; c++) {
+      const cell = this.cells[r][c];
+      cell.wrong = false;
+      if (cell.guessId === "o") {
+        if (cell.spriteId === "o") found++;
+        else {
+          cell.wrong = true;
+          win = false;
+        }
+      } else if (cell.spriteId === "o") {
+        win = false;
+      }
+    }
+  }
+  return win && found === this.n;
 };
 
 Grid.prototype.hasNearbyO = function (row, col) {
@@ -232,6 +262,7 @@ Grid.prototype.rebuild = function () {
     this.paintDells();
     if (new Solver(this).count(2) === 1) {
       this.unique = true;
+      this.clearGuesses();
       return true;
     }
   }
