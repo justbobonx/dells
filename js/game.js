@@ -1,7 +1,7 @@
 const canvas = document.getElementById("board");
 const ctx = canvas.getContext("2d");
 const elSize = document.getElementById("size");
-const elTries = document.getElementById("tries");
+const elBacks = document.getElementById("backs");
 const btnNew = document.getElementById("btn-new");
 
 const sprites = SpriteBank.defaults();
@@ -43,8 +43,8 @@ function newBoard() {
   elSize.value = String(n);
   grid = new Grid(n);
   grid.rebuild();
-  elTries.textContent = String(grid.tries);
-  elTries.style.color = grid.unique ? "#7dffb3" : "#ff6b6b";
+  elBacks.textContent = String(grid.backs);
+  elBacks.style.color = grid.unique ? "#7dffb3" : "#ff6b6b";
   layout();
   draw();
 }
