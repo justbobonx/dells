@@ -13,7 +13,7 @@ const elWin = document.getElementById("win-screen");
 const btnWinNew = document.getElementById("btn-win-new");
 
 const sprites = SpriteBank.defaults();
-const chrome = new PlayChrome();
+const playChrome = new PlayChrome();
 const TAP_MS = 280;
 
 let n = 8;
@@ -105,7 +105,7 @@ function restoreBoard() {
 
 function beginPlay() {
   playing = true;
-  chrome.enter().then(function () {
+  playChrome.enter().then(function () {
     elStart.hidden = true;
     if (!restoreBoard()) newBoard();
     else {
