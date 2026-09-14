@@ -9,6 +9,7 @@ function Cell(row, col) {
   this.wrong = false;
   this.locked = false;
   this.pond = false;
+  this.cave = false;
   this.wolf = false;
 }
 
