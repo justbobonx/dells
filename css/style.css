@@ -3,23 +3,26 @@ body {
   margin: 0;
   width: 100%;
   height: 100%;
+  height: 100dvh;
   overflow: hidden;
-  background: #0e1410;
-  font-family: ui-sans-serif, system-ui, sans-serif;
+  background: #111;
+  font-family: system-ui, sans-serif;
   color: #e8eef7;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
 canvas {
   display: block;
   width: 100%;
   height: 100%;
-  background: #0e1410;
+  background: #111;
   touch-action: none;
 }
 
-#hud {
+#hud,
+#hud-bottom {
   position: fixed;
-  top: 0;
   left: 0;
   right: 0;
   z-index: 2;
@@ -27,34 +30,55 @@ canvas {
   justify-content: space-between;
   align-items: center;
   padding: 10px 16px;
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
   letter-spacing: 0.12em;
   font-size: 13px;
   color: #c5d0dc;
-  text-shadow: 0 1px 2px #000;
-  background: linear-gradient(to bottom, rgba(14, 20, 16, 0.85), transparent);
+  pointer-events: none;
 }
 
-.hud-left {
-  font-weight: 700;
-  letter-spacing: 0.22em;
+#hud {
+  top: 0;
+  padding-top: max(10px, env(safe-area-inset-top));
+  background: linear-gradient(to bottom, rgba(17, 17, 17, 0.88), transparent);
 }
 
+#hud-bottom {
+  bottom: 0;
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+  background: linear-gradient(to top, rgba(17, 17, 17, 0.88), transparent);
+}
+
+.hud-left,
 .hud-right {
   display: flex;
   gap: 12px;
   align-items: center;
+  pointer-events: auto;
 }
 
 .hud-right strong {
-  color: #7dffb3;
   font-size: 16px;
 }
 
-.hud-right label {
+.hud-right strong.good {
+  color: #7dffa3;
+}
+
+.hud-right strong.bad {
+  color: #ff6b6b;
+}
+
+#score-cleared {
+  color: #f2f2f2;
+}
+
+label {
   letter-spacing: 0.08em;
 }
 
-.hud-right input {
+input[type="number"] {
   width: 3.2em;
   margin-left: 6px;
   background: #12151c;
@@ -64,7 +88,8 @@ canvas {
   font: inherit;
 }
 
-.hud-right button {
+#hud button,
+#hud-bottom button {
   background: #2a5a3a;
   color: #e8eef7;
   border: 1px solid #7dffb3;
@@ -75,7 +100,7 @@ canvas {
   cursor: pointer;
 }
 
-.hud-right button:hover {
+#hud button:hover {
   background: #34744a;
 }
 
@@ -86,25 +111,71 @@ canvas {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(14, 20, 16, 0.72);
+  background: #111;
 }
 
 .overlay[hidden] {
   display: none;
 }
 
+#win-screen {
+  background: rgba(17, 17, 17, 0.72);
+}
+
+.start-panel,
 .panel {
   text-align: center;
-  padding: 28px 36px;
-  background: #12151c;
-  border: 1px solid #2a3140;
+}
+
+.start-panel h1,
+.panel h1 {
+  margin: 0 0 28px;
+  letter-spacing: 0.22em;
+  font-size: 42px;
+  color: #f2f2f2;
 }
 
 .panel h1 {
-  margin: 0 0 18px;
-  letter-spacing: 0.22em;
-  font-size: 42px;
-  color: #7dffb3;
+  color: #7dffa3;
+  margin-bottom: 18px;
+}
+
+#btn-start {
+  display: block;
+  margin: 0 auto;
+  min-width: 160px;
+  padding: 10px 28px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #d0d0d0;
+  border: 1.25px solid #888;
+  border-radius: 10px;
+  letter-spacing: 0.12em;
+  font: 600 15px system-ui, sans-serif;
+  cursor: pointer;
+}
+
+#btn-start:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+#startEmail {
+  display: block;
+  margin-top: 22px;
+  color: #888;
+  text-decoration: none;
+  font: 500 14px system-ui, sans-serif;
+  letter-spacing: 0.02em;
+}
+
+#startEmail:hover,
+#startEmail:focus {
+  color: #d0d0d0;
+}
+
+.panel {
+  padding: 28px 36px;
+  background: #12151c;
+  border: 1px solid #2a3140;
 }
 
 .panel button {
