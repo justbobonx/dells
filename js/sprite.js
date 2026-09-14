@@ -1,4 +1,4 @@
-/** Named drawable. Bitmaps are 64x64; glyphs fill in until an image loads. */
+/** Named drawable. Bitmaps are 32x32; glyphs fill in until an image loads. */
 
 const TILE = 32;
 
@@ -51,8 +51,14 @@ SpriteBank.prototype.get = function (id) {
 SpriteBank.defaults = function (onReady) {
   const bank = new SpriteBank();
   const fox = bank.add(new Sprite("o", "V", "#f4f1e6", 0.82));
-  bank.add(new Sprite("w", "W", "#f4f1e6", 0.82));
+  const wolf = bank.add(new Sprite("w", "W", "#f4f1e6", 0.82));
   bank.add(new Sprite("x", "X", "#2a2118", 0.42));
-  fox.load("images/fox.png", onReady);
+  let left = 2;
+  function tick() {
+    left--;
+    if (left <= 0 && onReady) onReady();
+  }
+  fox.load("images/fox.png", tick);
+  wolf.load("images/wolf.png", tick);
   return bank;
 };
