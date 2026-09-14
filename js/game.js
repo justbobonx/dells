@@ -14,7 +14,9 @@ const elStart = document.getElementById("start-screen");
 const elWin = document.getElementById("win-screen");
 const btnWinNew = document.getElementById("btn-win-new");
 
-const sprites = SpriteBank.defaults();
+const sprites = SpriteBank.defaults(function () {
+  draw();
+});
 const playChrome = new PlayChrome();
 const TAP_MS = 280;
 
