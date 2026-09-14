@@ -173,10 +173,7 @@ function draw() {
 
       const mark = cell.guessId === "o" && cell.dellId === wolfDell ? "w" : cell.guessId;
       const sprite = sprites.get(mark);
-      if (sprite) {
-        const pad = Math.floor(s * 0.12);
-        sprite.draw(ctx, x + pad, y + pad, s - pad * 2);
-      }
+      if (sprite) sprite.draw(ctx, x, y, s);
 
       if (cell.locked || cell.wrong) {
         ctx.strokeStyle = cell.locked ? "#7dffa3" : "#e23b3b";
