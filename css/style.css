@@ -60,6 +60,10 @@ canvas {
   pointer-events: auto;
 }
 
+.hud-left {
+  font-size: 22px;
+}
+
 .hud-right strong {
   font-size: 16px;
 }
