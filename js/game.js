@@ -17,7 +17,7 @@ function clamp(n, lo, hi) {
 }
 
 function readN() {
-  return clamp(parseInt(elSize.value, 10) || 8, 2, 20);
+  return clamp(parseInt(elSize.value, 10) || 8, 4, 20);
 }
 
 function layout() {
@@ -83,9 +83,32 @@ function draw() {
   }
 }
 
+function cellAtEvent(e) {
+  const rect = canvas.getBoundingClientRect();
+  const x = ((e.clientX - rect.left) * canvas.width) / rect.width;
+  const y = ((e.clientY - rect.top) * canvas.height) / rect.height;
+  const col = Math.floor((x - originX) / cellSize);
+  const row = Math.floor((y - originY) / cellSize);
+  if (row < 0 || col < 0 || row >= n || col >= n) return null;
+  return { row: row, col: col };
+}
+
+function onBoardPointer(e) {
+  if (!grid) return;
+  const hit = cellAtEvent(e);
+  if (!hit) return;
+  e.preventDefault();
+  const cell = grid.at(hit.row, hit.col);
+  if (cell.spriteId === "o") return;
+  cell.setSprite(cell.spriteId === "x" ? null : "x");
+  draw();
+}
+
 btnNew.addEventListener("click", newBoard);
 
 elSize.addEventListener("change", newBoard);
+
+canvas.addEventListener("pointerdown", onBoardPointer);
 
 window.addEventListener("resize", function () {
   layout();

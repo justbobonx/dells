@@ -2,6 +2,7 @@
 
 const MIN_DELL_SIZE = 3;
 const DELL_PAINT_TRIES = 40;
+const PLACE_TRIES = 200;
 
 const DELL_DIRS = [
   [0, 1],
@@ -57,11 +58,31 @@ Grid.prototype.setSprite = function (row, col, id) {
   this.cells[row][col].setSprite(id);
 };
 
+Grid.prototype.hasNearbyO = function (row, col) {
+  for (let dr = -1; dr <= 1; dr++) {
+    for (let dc = -1; dc <= 1; dc++) {
+      if (!dr && !dc) continue;
+      const r = row + dr;
+      const c = col + dc;
+      if (r < 0 || c < 0 || r >= this.n || c >= this.n) continue;
+      if (this.cells[r][c].spriteId === "o") return true;
+    }
+  }
+  return false;
+};
+
 /**
- * Place one O per row and column.
- * Walk leftover rows and leftover columns; each step picks one of each.
+ * Place one O per row and column. No two Os 8-way adjacent.
+ * Pick from leftover rows and cols that still have a safe pair.
  */
 Grid.prototype.placeOs = function () {
+  for (let t = 0; t < PLACE_TRIES; t++) {
+    if (this.tryPlaceOs()) return true;
+  }
+  return false;
+};
+
+Grid.prototype.tryPlaceOs = function () {
   this.clearSprites();
   const rows = [];
   const cols = [];
@@ -70,12 +91,21 @@ Grid.prototype.placeOs = function () {
     cols.push(i);
   }
   while (rows.length) {
-    const ri = Math.floor(Math.random() * rows.length);
-    const ci = Math.floor(Math.random() * cols.length);
-    const row = rows.splice(ri, 1)[0];
-    const col = cols.splice(ci, 1)[0];
+    const opts = [];
+    for (let i = 0; i < rows.length; i++) {
+      for (let j = 0; j < cols.length; j++) {
+        if (!this.hasNearbyO(rows[i], cols[j])) {
+          opts.push({ i: i, j: j });
+        }
+      }
+    }
+    if (!opts.length) return false;
+    const pick = opts[Math.floor(Math.random() * opts.length)];
+    const row = rows.splice(pick.i, 1)[0];
+    const col = cols.splice(pick.j, 1)[0];
     this.cells[row][col].setSprite("o");
   }
+  return true;
 };
 
 Grid.prototype.freeNeighbors = function (row, col) {
