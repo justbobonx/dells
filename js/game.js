@@ -128,8 +128,16 @@ function beginPlay() {
   });
 }
 
+function capRadii(w, h, rad) {
+  const max = Math.min(w, h) / 2;
+  if (typeof rad === "number") return Math.min(Math.max(0, rad), max);
+  const out = [];
+  for (let i = 0; i < 4; i++) out.push(Math.min(Math.max(0, rad[i] || 0), max));
+  return out;
+}
+
 function fillRound(x, y, w, h, rad) {
-  const r = Math.min(rad, w / 2, h / 2);
+  const r = capRadii(w, h, rad);
   if (ctx.roundRect) {
     ctx.beginPath();
     ctx.roundRect(x, y, w, h, r);
@@ -140,7 +148,7 @@ function fillRound(x, y, w, h, rad) {
 }
 
 function strokeRound(x, y, w, h, rad) {
-  const r = Math.min(rad, w / 2, h / 2);
+  const r = capRadii(w, h, rad);
   if (ctx.roundRect) {
     ctx.beginPath();
     ctx.roundRect(x, y, w, h, r);
@@ -148,6 +156,25 @@ function strokeRound(x, y, w, h, rad) {
     return;
   }
   ctx.strokeRect(x, y, w, h);
+}
+
+function sameDell(row, col, dellId) {
+  if (row < 0 || col < 0 || row >= grid.n || col >= grid.n) return false;
+  const other = grid.at(row, col);
+  return !other.pond && other.dellId === dellId;
+}
+
+function cellRadii(row, col, dellId, rad) {
+  const up = sameDell(row - 1, col, dellId);
+  const down = sameDell(row + 1, col, dellId);
+  const left = sameDell(row, col - 1, dellId);
+  const right = sameDell(row, col + 1, dellId);
+  return [
+    up || left ? 0 : rad,
+    up || right ? 0 : rad,
+    down || right ? 0 : rad,
+    down || left ? 0 : rad,
+  ];
 }
 
 function draw() {
@@ -168,8 +195,9 @@ function draw() {
       const x = originX + c * cellSize + inset;
       const y = originY + r * cellSize + inset;
       const s = cellSize - inset * 2;
+      const corners = cellRadii(r, c, cell.dellId, rad);
       ctx.fillStyle = grid.dellColor(cell.dellId);
-      fillRound(x, y, s, s, rad);
+      fillRound(x, y, s, s, corners);
 
       const mark = cell.guessId === "o" && cell.dellId === wolfDell ? "w" : cell.guessId;
       const sprite = sprites.get(mark);
@@ -178,7 +206,7 @@ function draw() {
       if (cell.locked || cell.wrong) {
         ctx.strokeStyle = cell.locked ? "#7dffa3" : "#e23b3b";
         ctx.lineWidth = Math.max(2, Math.floor(cellSize * 0.06));
-        strokeRound(x + 1, y + 1, s - 2, s - 2, rad);
+        strokeRound(x + 1, y + 1, s - 2, s - 2, corners);
       }
     }
   }
