@@ -24,6 +24,8 @@ const playChrome = new PlayChrome();
 const TAP_MS = 280;
 const POND_FILL = "#0D1E35";
 const POND_EDGE = "#15537F";
+const CAVE_FILL = "#1a1a1a";
+const CAVE_EDGE = "#8a8a8a";
 
 let n = Save.readSize();
 let grid = null;
@@ -194,7 +196,8 @@ function samePatch(row, col, cell) {
   if (row < 0 || col < 0 || row >= grid.n || col >= grid.n) return false;
   const other = grid.at(row, col);
   if (cell.pond) return !!other.pond;
-  return !other.pond && other.dellId === cell.dellId;
+  if (cell.wolf) return !!other.wolf;
+  return !other.pond && !other.wolf && other.dellId === cell.dellId;
 }
 
 function cellRadii(row, col, cell, rad) {
@@ -221,8 +224,7 @@ function draw() {
   const rad = Math.max(4, Math.floor(cellSize * 0.16));
   const checkW = Math.max(2, Math.floor(cellSize * 0.06));
   const waterW = Math.max(1, Math.floor(checkW * 0.45));
-  const wolf = grid.findWolf();
-  const wolfDell = wolf ? wolf.dellId : -1;
+  const wolfSpr = sprites.get("w");
   for (let r = 0; r < grid.n; r++) {
     for (let c = 0; c < grid.n; c++) {
       const cell = grid.at(r, c);
@@ -240,11 +242,20 @@ function draw() {
         continue;
       }
 
+      if (cell.wolf) {
+        ctx.fillStyle = CAVE_FILL;
+        fillRound(x, y, s, s, corners);
+        ctx.strokeStyle = CAVE_EDGE;
+        ctx.lineWidth = waterW;
+        strokeRound(x + 1, y + 1, s - 2, s - 2, corners);
+        if (wolfSpr) wolfSpr.draw(ctx, x, y, s);
+        continue;
+      }
+
       ctx.fillStyle = grid.dellColor(cell.dellId);
       fillRound(x, y, s, s, corners);
 
-      const mark = cell.guessId === "o" && cell.dellId === wolfDell ? "w" : cell.guessId;
-      const sprite = sprites.get(mark);
+      const sprite = sprites.get(cell.guessId);
       if (sprite) sprite.draw(ctx, x, y, s);
 
       if (cell.locked || cell.wrong) {
@@ -273,7 +284,7 @@ function sameCell(a, b) {
 
 function applySingle(hit) {
   const cell = grid.at(hit.row, hit.col);
-  if (cell.pond || cell.locked) return;
+  if (cell.pond || cell.wolf || cell.locked) return;
   if (!cell.guessId) cell.setGuess("x");
   else cell.setGuess(null);
   paintScore();
@@ -283,7 +294,7 @@ function applySingle(hit) {
 
 function applyDouble(hit) {
   const cell = grid.at(hit.row, hit.col);
-  if (cell.pond || cell.locked) return;
+  if (cell.pond || cell.wolf || cell.locked) return;
   cell.setGuess("o");
   paintScore();
   persistBoard();
