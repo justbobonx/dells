@@ -8,6 +8,7 @@ function Cell(row, col) {
   this.guessId = null;
   this.wrong = false;
   this.locked = false;
+  this.pond = false;
 }
 
 Cell.prototype.setSprite = function (id) {

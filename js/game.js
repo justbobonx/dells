@@ -151,6 +151,7 @@ function draw() {
   for (let r = 0; r < grid.n; r++) {
     for (let c = 0; c < grid.n; c++) {
       const cell = grid.at(r, c);
+      if (cell.pond) continue;
       const x = originX + c * cellSize + inset;
       const y = originY + r * cellSize + inset;
       const s = cellSize - inset * 2;
@@ -164,8 +165,8 @@ function draw() {
       }
 
       if (cell.locked || cell.wrong) {
-        ctx.strokeStyle = cell.locked ? "#00EB46" : "#e23b3b";
-        ctx.lineWidth = Math.max(2, Math.floor(cellSize * 0.04));
+        ctx.strokeStyle = cell.locked ? "#7dffa3" : "#e23b3b";
+        ctx.lineWidth = Math.max(2, Math.floor(cellSize * 0.06));
         strokeRound(x + 1, y + 1, s - 2, s - 2, rad);
       }
     }
@@ -189,7 +190,7 @@ function sameCell(a, b) {
 
 function applySingle(hit) {
   const cell = grid.at(hit.row, hit.col);
-  if (cell.locked) return;
+  if (cell.pond || cell.locked) return;
   if (!cell.guessId) cell.setGuess("x");
   else cell.setGuess(null);
   paintScore();
@@ -199,7 +200,7 @@ function applySingle(hit) {
 
 function applyDouble(hit) {
   const cell = grid.at(hit.row, hit.col);
-  if (cell.locked) return;
+  if (cell.pond || cell.locked) return;
   cell.setGuess("o");
   paintScore();
   persistBoard();
