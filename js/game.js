@@ -14,6 +14,10 @@ const elStart = document.getElementById("start-screen");
 const elWin = document.getElementById("win-screen");
 const btnWinNew = document.getElementById("btn-win-new");
 
+//pixelated
+canvas.style.imageRendering = "pixelated";
+ctx.imageSmoothingEnabled = false;
+
 const sprites = SpriteBank.defaults(function () {
   draw();
 });
