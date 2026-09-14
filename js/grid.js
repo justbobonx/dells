@@ -42,6 +42,7 @@ function Grid(n) {
   this.tries = 0;
   this.backs = 0;
   this.unique = false;
+  this.wolfShown = false;
   this.cells = [];
   for (let r = 0; r < n; r++) {
     const row = [];
@@ -196,6 +197,7 @@ Grid.prototype.setSprite = function (row, col, id) {
 };
 
 Grid.prototype.clearGuesses = function () {
+  this.wolfShown = false;
   for (let r = 0; r < this.n; r++) {
     for (let c = 0; c < this.n; c++) this.cells[r][c].clearGuess();
   }
@@ -211,6 +213,32 @@ Grid.prototype.guessOCount = function () {
   return n;
 };
 
+Grid.prototype.markWolfCheck = function (won) {
+  const wolf = this.findWolf();
+  this.wolfShown = !!(won && wolf);
+  let right = false;
+  let wrongs = 0;
+  for (let r = 0; r < this.n; r++) {
+    for (let c = 0; c < this.n; c++) {
+      const cell = this.cells[r][c];
+      if (!cell.cave) continue;
+      if (cell.guessId === "w") {
+        if (cell.wolf) {
+          right = true;
+          cell.wrong = false;
+        } else {
+          cell.wrong = true;
+          wrongs++;
+        }
+      } else {
+        cell.wrong = false;
+      }
+      if (!cell.wolf) cell.locked = false;
+    }
+  }
+  if (wolf) wolf.locked = !!(won && right && wrongs === 0);
+};
+
 Grid.prototype.checkGuesses = function () {
   let win = true;
   let found = 0;
@@ -219,10 +247,7 @@ Grid.prototype.checkGuesses = function () {
   for (let r = 0; r < this.n; r++) {
     for (let c = 0; c < this.n; c++) {
       const cell = this.cells[r][c];
-      if (cell.pond || cell.cave) {
-        cell.wrong = false;
-        continue;
-      }
+      if (cell.pond || cell.cave) continue;
       if (cell.guessId === "o") {
         if (cell.spriteId === "o") {
           found++;
@@ -240,7 +265,9 @@ Grid.prototype.checkGuesses = function () {
       }
     }
   }
-  return { win: win && found === this.n, rights: rights, wrongs: wrongs };
+  const won = win && found === this.n;
+  this.markWolfCheck(won);
+  return { win: won, rights: rights, wrongs: wrongs };
 };
 
 Grid.prototype.dump = function () {
@@ -260,13 +287,14 @@ Grid.prototype.dump = function () {
       });
     }
   }
-  return { n: this.n, unique: this.unique, cells: cells };
+  return { n: this.n, unique: this.unique, wolfShown: !!this.wolfShown, cells: cells };
 };
 
 Grid.load = function (data) {
   if (!data || !data.n || !data.cells || data.cells.length !== data.n * data.n) return null;
   const grid = new Grid(data.n);
   grid.unique = !!data.unique;
+  grid.wolfShown = !!data.wolfShown;
   let i = 0;
   for (let r = 0; r < data.n; r++) {
     for (let c = 0; c < data.n; c++) {
@@ -509,6 +537,7 @@ Grid.prototype.dellColor = function (dellId) {
 
 Grid.prototype.rebuild = function () {
   this.unique = false;
+  this.wolfShown = false;
   this.tries = 0;
   this.backs = 0;
   for (let t = 0; t < UNIQUE_TRIES; t++) {
