@@ -148,6 +148,8 @@ function draw() {
 
   const inset = Math.max(1, Math.floor(cellSize * 0.06));
   const rad = Math.max(4, Math.floor(cellSize * 0.16));
+  const wolf = grid.findWolf();
+  const wolfDell = wolf ? wolf.dellId : -1;
   for (let r = 0; r < grid.n; r++) {
     for (let c = 0; c < grid.n; c++) {
       const cell = grid.at(r, c);
@@ -158,7 +160,7 @@ function draw() {
       ctx.fillStyle = grid.dellColor(cell.dellId);
       fillRound(x, y, s, s, rad);
 
-      const mark = cell.locked && cell.wolf && cell.guessId === "o" ? "w" : cell.guessId;
+      const mark = cell.guessId === "o" && cell.dellId === wolfDell ? "w" : cell.guessId;
       const sprite = sprites.get(mark);
       if (sprite) {
         const pad = Math.floor(s * 0.12);
