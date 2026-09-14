@@ -1,6 +1,6 @@
 /** Named drawable. Bitmaps are 64x64; glyphs fill in until an image loads. */
 
-const TILE = 64;
+const TILE = 32;
 
 function Sprite(id, glyph, color, scale) {
   this.id = id;
