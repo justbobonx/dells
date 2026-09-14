@@ -14,7 +14,7 @@ Sprite.prototype.draw = function (ctx, x, y, size) {
   }
   if (!this.glyph) return;
   ctx.fillStyle = this.color;
-  ctx.font = "bold " + Math.floor(size * 0.55) + "px ui-sans-serif, sans-serif";
+  ctx.font = "bold " + Math.floor(size * 0.82) + "px ui-sans-serif, sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(this.glyph, x + size / 2, y + size / 2 + 1);
