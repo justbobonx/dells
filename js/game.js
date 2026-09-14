@@ -1,16 +1,17 @@
 const canvas = document.getElementById("board");
 const ctx = canvas.getContext("2d");
-const elLevel = document.getElementById("level");
 const elOs = document.getElementById("os-count");
 const elCleared = document.getElementById("score-cleared");
 const elRights = document.getElementById("score-rights");
 const elWrongs = document.getElementById("score-wrongs");
-const btnMinus = document.getElementById("btn-minus");
+const btnMenu = document.getElementById("btn-menu");
+const btnNewMinus = document.getElementById("btn-new-minus");
 const btnNew = document.getElementById("btn-new");
-const btnPlus = document.getElementById("btn-plus");
+const btnNewPlus = document.getElementById("btn-new-plus");
 const btnCheck = document.getElementById("btn-check");
 const btnStart = document.getElementById("btn-start");
 const elStart = document.getElementById("start-screen");
+const elMenu = document.getElementById("menu-screen");
 const elWin = document.getElementById("win-screen");
 const btnWinNew = document.getElementById("btn-win-new");
 
@@ -39,7 +40,6 @@ function clamp(n, lo, hi) {
 function setLevel(size) {
   n = clamp(size, 4, 20);
   Save.writeSize(n);
-  if (elLevel) elLevel.textContent = String(n);
   return n;
 }
 
@@ -72,6 +72,15 @@ function hideWin() {
   elWin.hidden = true;
 }
 
+function hideMenu() {
+  elMenu.hidden = true;
+}
+
+function showMenu() {
+  if (!playing) return;
+  elMenu.hidden = false;
+}
+
 function persistBoard() {
   if (!playing || !grid) return;
   Save.writeBoard(grid.dump());
@@ -85,12 +94,13 @@ function paintScore() {
   elCleared.textContent = String(score.cleared);
   elRights.textContent = String(score.rights);
   elWrongs.textContent = String(score.wrongs);
-  if (grid) elOs.textContent = grid.guessOCount() + "/" + grid.n + " Vs";
-  else elOs.textContent = "0/" + n + " Vs";
+  if (grid) elOs.textContent = grid.guessOCount() + "/" + grid.n;
+  else elOs.textContent = "0/" + n;
 }
 
 function showBoard() {
   hideWin();
+  hideMenu();
   setLevel(n);
   paintScore();
   layout();
@@ -99,6 +109,7 @@ function showBoard() {
 
 function newBoard() {
   hideWin();
+  hideMenu();
   setLevel(n);
   grid = new Grid(n);
   grid.rebuild();
@@ -260,8 +271,12 @@ function applyDouble(hit) {
   draw();
 }
 
+function menuOpen() {
+  return !elMenu.hidden;
+}
+
 function onBoardPointer(e) {
-  if (!playing || !grid || !elWin.hidden) return;
+  if (!playing || !grid || !elWin.hidden || menuOpen()) return;
   const hit = cellAtEvent(e);
   if (!hit) return;
   e.preventDefault();
@@ -282,7 +297,7 @@ function onBoardPointer(e) {
 }
 
 function checkBoard() {
-  if (!playing || !grid) return;
+  if (!playing || !grid || menuOpen()) return;
   const result = grid.checkGuesses();
   score.rights += result.rights;
   score.wrongs += result.wrongs;
@@ -299,7 +314,12 @@ function checkBoard() {
 }
 
 btnStart.addEventListener("click", beginPlay);
-btnMinus.addEventListener("click", function () {
+btnMenu.addEventListener("click", function () {
+  if (!playing) return;
+  if (menuOpen()) hideMenu();
+  else showMenu();
+});
+btnNewMinus.addEventListener("click", function () {
   if (!playing) return;
   setLevel(n - 1);
   newBoard();
@@ -308,7 +328,7 @@ btnNew.addEventListener("click", function () {
   if (!playing) return;
   newBoard();
 });
-btnPlus.addEventListener("click", function () {
+btnNewPlus.addEventListener("click", function () {
   if (!playing) return;
   setLevel(n + 1);
   newBoard();
@@ -318,6 +338,9 @@ btnWinNew.addEventListener("click", function () {
   newBoard();
 });
 btnCheck.addEventListener("click", checkBoard);
+elMenu.addEventListener("click", function (e) {
+  if (e.target === elMenu) hideMenu();
+});
 canvas.addEventListener("pointerdown", onBoardPointer);
 
 window.addEventListener("resize", function () {

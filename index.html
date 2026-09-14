@@ -6,17 +6,16 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <title>foxes</title>
-    <link rel="stylesheet" href="css/style.css?v=14" />
+    <link rel="stylesheet" href="css/style.css?v=15" />
   </head>
   <body>
     <canvas id="board"></canvas>
 
     <div id="hud">
       <div class="hud-left">
-        <span id="level">6</span>
-        <button id="btn-minus" type="button">-</button>
-        <button id="btn-new" type="button">NEW</button>
-        <button id="btn-plus" type="button">+</button>
+        <button id="btn-menu" type="button" aria-label="menu">
+          <span></span><span></span><span></span>
+        </button>
       </div>
       <div class="hud-right">
         <button id="btn-check" type="button">CHECK</button>
@@ -24,7 +23,7 @@
     </div>
 
     <div id="hud-bottom">
-      <div class="hud-left"><span id="os-count">0/6 Vs</span></div>
+      <div class="hud-left"><span id="os-count">0/6</span></div>
       <div class="hud-right">
         <span>CLEARED <strong id="score-cleared">0</strong></span>
         <span>RIGHT <strong id="score-rights" class="good">0</strong></span>
@@ -44,6 +43,14 @@
       </div>
     </div>
 
+    <div id="menu-screen" class="overlay" hidden>
+      <div class="panel menu-panel">
+        <button id="btn-new-minus" type="button">NEW-</button>
+        <button id="btn-new" type="button">NEW</button>
+        <button id="btn-new-plus" type="button">NEW+</button>
+      </div>
+    </div>
+
     <div id="win-screen" class="overlay" hidden>
       <div class="panel">
         <h1>WIN</h1>
@@ -51,12 +58,12 @@
       </div>
     </div>
 
-    <script src="js/sprite.js?v=14"></script>
-    <script src="js/cell.js?v=14"></script>
-    <script src="js/grid.js?v=14"></script>
-    <script src="js/solver.js?v=14"></script>
-    <script src="js/save.js?v=14"></script>
-    <script src="js/chrome.js?v=14"></script>
-    <script src="js/game.js?v=14"></script>
+    <script src="js/sprite.js?v=15"></script>
+    <script src="js/cell.js?v=15"></script>
+    <script src="js/grid.js?v=15"></script>
+    <script src="js/solver.js?v=15"></script>
+    <script src="js/save.js?v=15"></script>
+    <script src="js/chrome.js?v=15"></script>
+    <script src="js/game.js?v=15"></script>
   </body>
 </html>

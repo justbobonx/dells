@@ -76,21 +76,6 @@ canvas {
   color: #f2f2f2;
 }
 
-#level {
-  min-width: 1.1em;
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: 0;
-  line-height: 1;
-  color: #f2f2f2;
-}
-
-#btn-minus,
-#btn-plus {
-  min-width: 36px;
-  padding: 6px 10px;
-}
-
 #hud button,
 #hud-bottom button {
   background: #2a5a3a;
@@ -107,6 +92,21 @@ canvas {
   background: #34744a;
 }
 
+#btn-menu {
+  width: 40px;
+  height: 36px;
+  padding: 8px 9px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+#btn-menu span {
+  display: block;
+  height: 2px;
+  background: #7dffb3;
+}
+
 .overlay {
   position: fixed;
   inset: 0;
@@ -121,7 +121,8 @@ canvas {
   display: none;
 }
 
-#win-screen {
+#win-screen,
+#menu-screen {
   background: rgba(17, 17, 17, 0.72);
 }
 
@@ -209,4 +210,11 @@ canvas {
   font: inherit;
   font-weight: 700;
   cursor: pointer;
+}
+
+.menu-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 160px;
 }
