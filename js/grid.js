@@ -133,14 +133,16 @@ Grid.prototype.caveGrowOpts = function (body) {
   const seen = {};
   const out = [];
   for (let i = 0; i < body.length; i++) {
-    const open = this.freeNeighbors(body[i].r, body[i].c);
-    for (let k = 0; k < open.length; k++) {
-      const p = open[k];
-      const key = p.r + "," + p.c;
+    for (let d = 0; d < DELL_DIRS.length; d++) {
+      const nr = body[i].r + DELL_DIRS[d][0];
+      const nc = body[i].c + DELL_DIRS[d][1];
+      if (nr < 0 || nc < 0 || nr >= this.n || nc >= this.n) continue;
+      const key = nr + "," + nc;
       if (seen[key]) continue;
-      if (this.cells[p.r][p.c].pond) continue;
+      const cell = this.cells[nr][nc];
+      if (cell.pond || cell.cave) continue;
       seen[key] = true;
-      out.push(p);
+      out.push({ r: nr, c: nc });
     }
   }
   return out;
@@ -279,7 +281,7 @@ Grid.load = function (data) {
       cell.wolf = !!src.wolf;
       if (cell.pond || cell.cave) {
         cell.dellId = HOLE_DELL;
-        if (cell.pond || cell.cave) cell.spriteId = null;
+        cell.spriteId = null;
       }
     }
   }
