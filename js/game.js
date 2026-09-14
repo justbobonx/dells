@@ -14,10 +14,6 @@ const elStart = document.getElementById("start-screen");
 const elWin = document.getElementById("win-screen");
 const btnWinNew = document.getElementById("btn-win-new");
 
-//pixelated
-canvas.style.imageRendering = "pixelated";
-ctx.imageSmoothingEnabled = false;
-
 const sprites = SpriteBank.defaults(function () {
   draw();
 });
@@ -45,11 +41,17 @@ function setLevel(size) {
   return n;
 }
 
+function crisp() {
+  canvas.style.imageRendering = "pixelated";
+  ctx.imageSmoothingEnabled = false;
+}
+
 function layout() {
   const w = window.innerWidth;
   const h = window.innerHeight;
   canvas.width = w;
   canvas.height = h;
+  crisp();
   const padTop = 56;
   const padBot = 56;
   const pad = 24;
@@ -150,6 +152,7 @@ function strokeRound(x, y, w, h, rad) {
 
 function draw() {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.imageSmoothingEnabled = false;
   ctx.fillStyle = "#111111";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   if (!grid) return;

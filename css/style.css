@@ -18,6 +18,8 @@ canvas {
   height: 100%;
   background: #111;
   touch-action: none;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 
 #hud,
@@ -128,6 +130,25 @@ canvas {
   text-align: center;
 }
 
+.title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 0 0 28px;
+}
+
+.title-row h1 {
+  margin: 0;
+}
+
+.title-fox {
+  width: 64px;
+  height: 64px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
 .start-panel h1,
 .panel h1 {
   margin: 0 0 28px;
@@ -146,9 +167,9 @@ canvas {
   margin: 0 auto;
   min-width: 160px;
   padding: 10px 28px;
-  background: rgba(255, 255, 255, 0.06);
-  color: #d0d0d0;
-  border: 1.25px solid #888;
+  background: #2a5a3a;
+  color: #e8eef7;
+  border: 1.25px solid #7dffb3;
   border-radius: 10px;
   letter-spacing: 0.12em;
   font: 600 15px system-ui, sans-serif;
@@ -156,7 +177,7 @@ canvas {
 }
 
 #btn-start:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: #34744a;
 }
 
 #startEmail {
