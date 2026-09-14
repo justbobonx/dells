@@ -127,6 +127,7 @@ function resetBoard() {
   if (!playing || !grid) return;
   hideWin();
   hideMenu();
+  grid.wolfShown = false;
   for (let r = 0; r < grid.n; r++) {
     for (let c = 0; c < grid.n; c++) grid.at(r, c).resetMarks();
   }
@@ -254,8 +255,14 @@ function draw() {
         ctx.strokeStyle = CAVE_EDGE;
         ctx.lineWidth = waterW;
         strokeRound(x + 1, y + 1, s - 2, s - 2, corners);
-        const mark = cell.guessId === "x" ? "xl" : cell.guessId;
+        const showWolf = cell.wolf && (grid.wolfShown || cell.guessId === "w");
+        const mark = showWolf ? "w" : cell.guessId === "x" ? "xl" : cell.guessId;
         drawSprite(sprites.get(mark), x, y, s);
+        if (cell.locked || cell.wrong) {
+          ctx.strokeStyle = cell.locked ? "#7dffa3" : "#e23b3b";
+          ctx.lineWidth = checkW;
+          strokeRound(x + 1, y + 1, s - 2, s - 2, corners);
+        }
         continue;
       }
 
