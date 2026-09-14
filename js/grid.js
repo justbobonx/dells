@@ -4,6 +4,7 @@ const MIN_DELL_SIZE = 3;
 const DELL_PAINT_TRIES = 40;
 const PLACE_TRIES = 200;
 const UNIQUE_TRIES = 250;
+const HOLE_DELL = -2;
 
 const DELL_DIRS = [
   [0, 1],
@@ -52,6 +53,10 @@ Grid.prototype.at = function (row, col) {
   return this.cells[row][col];
 };
 
+Grid.prototype.isHole = function (row, col) {
+  return this.cells[row][col].dellId === HOLE_DELL;
+};
+
 Grid.prototype.clearSprites = function () {
   for (let r = 0; r < this.n; r++) {
     for (let c = 0; c < this.n; c++) {
@@ -63,7 +68,12 @@ Grid.prototype.clearSprites = function () {
 
 Grid.prototype.clearPonds = function () {
   for (let r = 0; r < this.n; r++) {
-    for (let c = 0; c < this.n; c++) this.cells[r][c].pond = false;
+    for (let c = 0; c < this.n; c++) {
+      if (this.cells[r][c].pond) {
+        this.cells[r][c].pond = false;
+        this.cells[r][c].dellId = -1;
+      }
+    }
   }
 };
 
@@ -84,14 +94,22 @@ Grid.prototype.placePond = function () {
   const r0 = Math.floor(Math.random() * (this.n - h + 1));
   const c0 = Math.floor(Math.random() * (this.n - w + 1));
   for (let r = r0; r < r0 + h; r++) {
-    for (let c = c0; c < c0 + w; c++) this.cells[r][c].pond = true;
+    for (let c = c0; c < c0 + w; c++) {
+      this.cells[r][c].pond = true;
+      this.cells[r][c].dellId = HOLE_DELL;
+    }
   }
   return true;
 };
 
 Grid.prototype.clearWolves = function () {
   for (let r = 0; r < this.n; r++) {
-    for (let c = 0; c < this.n; c++) this.cells[r][c].wolf = false;
+    for (let c = 0; c < this.n; c++) {
+      if (this.cells[r][c].wolf) {
+        this.cells[r][c].wolf = false;
+        if (!this.cells[r][c].pond) this.cells[r][c].dellId = -1;
+      }
+    }
   }
 };
 
@@ -110,7 +128,7 @@ Grid.prototype.wolfHoleClear = function (row, col) {
       const r = row + dr;
       const c = col + dc;
       if (r < 0 || c < 0 || r >= this.n || c >= this.n) return false;
-      if (this.cells[r][c].pond) return false;
+      if (this.cells[r][c].pond || this.cells[r][c].dellId === HOLE_DELL) return false;
     }
   }
   return true;
@@ -129,7 +147,10 @@ Grid.prototype.placeWolf = function () {
   }
   if (!opts.length) return false;
   const pick = opts[Math.floor(Math.random() * opts.length)];
-  this.cells[pick.r][pick.c].wolf = true;
+  const cell = this.cells[pick.r][pick.c];
+  cell.wolf = true;
+  cell.dellId = HOLE_DELL;
+  cell.spriteId = null;
   return true;
 };
 
@@ -222,6 +243,10 @@ Grid.load = function (data) {
       cell.locked = !!src.locked;
       cell.pond = !!src.pond;
       cell.wolf = !!src.wolf;
+      if (cell.pond || cell.wolf) {
+        cell.dellId = HOLE_DELL;
+        cell.spriteId = null;
+      }
     }
   }
   return grid;
@@ -263,8 +288,7 @@ Grid.prototype.tryPlaceOs = function () {
     const opts = [];
     for (let i = 0; i < rows.length; i++) {
       for (let j = 0; j < cols.length; j++) {
-        const cell = this.cells[rows[i]][cols[j]];
-        if (cell.pond || cell.wolf) continue;
+        if (this.isHole(rows[i], cols[j])) continue;
         if (this.nearWolf(rows[i], cols[j])) continue;
         if (!this.hasNearbyO(rows[i], cols[j])) {
           opts.push({ i: i, j: j });
@@ -286,9 +310,7 @@ Grid.prototype.freeNeighbors = function (row, col) {
     const nr = row + DELL_DIRS[d][0];
     const nc = col + DELL_DIRS[d][1];
     if (nr < 0 || nc < 0 || nr >= this.n || nc >= this.n) continue;
-    const cell = this.cells[nr][nc];
-    if (cell.pond || cell.wolf) continue;
-    if (cell.dellId !== -1) continue;
+    if (this.cells[nr][nc].dellId !== -1) continue;
     out.push({ r: nr, c: nc });
   }
   return out;
@@ -318,7 +340,8 @@ Grid.prototype.tryPaintDells = function (minSize) {
   const seeds = [];
   for (let r = 0; r < n; r++) {
     for (let c = 0; c < n; c++) {
-      if (this.cells[r][c].spriteId === "o") seeds.push({ r: r, c: c });
+      const cell = this.cells[r][c];
+      if (cell.spriteId === "o" && cell.dellId !== HOLE_DELL) seeds.push({ r: r, c: c });
     }
   }
   if (!seeds.length) return false;
@@ -326,7 +349,7 @@ Grid.prototype.tryPaintDells = function (minSize) {
   for (let r = 0; r < n; r++) {
     for (let c = 0; c < n; c++) {
       const cell = this.cells[r][c];
-      cell.dellId = cell.pond || cell.wolf ? -2 : -1;
+      cell.dellId = cell.pond || cell.wolf ? HOLE_DELL : -1;
     }
   }
 
@@ -334,6 +357,7 @@ Grid.prototype.tryPaintDells = function (minSize) {
   const frontier = [];
   for (let i = 0; i < seeds.length; i++) {
     const s = seeds[i];
+    if (this.cells[s.r][s.c].dellId === HOLE_DELL) continue;
     this.cells[s.r][s.c].dellId = i;
     sizes[i] = 1;
     frontier.push({ r: s.r, c: s.c, id: i });
