@@ -6,7 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <title>foxes</title>
-    <link rel="stylesheet" href="css/style.css?v=40" />
+    <link rel="stylesheet" href="css/style.css?v=41" />
   </head>
   <body>
     <canvas id="board"></canvas>
@@ -14,9 +14,18 @@
     <div id="hud">
       <div class="hud-left"><span id="os-count">0/6</span></div>
       <div class="hud-right">
-        <span>CLEARED <strong id="score-cleared">0</strong></span>
-        <span>RIGHT <strong id="score-rights" class="good">0</strong></span>
-        <span>WRONG <strong id="score-wrongs" class="bad">0</strong></span>
+        <div class="hud-stat">
+          <span class="hud-lbl">CLEARED</span>
+          <strong id="score-cleared">0</strong>
+        </div>
+        <div class="hud-stat">
+          <span class="hud-lbl">RIGHT</span>
+          <strong id="score-rights" class="good">0</strong>
+        </div>
+        <div class="hud-stat">
+          <span class="hud-lbl">WRONG</span>
+          <strong id="score-wrongs" class="bad">0</strong>
+        </div>
       </div>
     </div>
 
@@ -49,7 +58,7 @@
           <button id="btn-new-minus" type="button">-</button>
           <button id="btn-new-plus" type="button">+</button>
         </div>
-        <button id="btn-hint" type="button">HINT</button>
+        <button id="btn-clear" type="button">CLEAR</button>
       </div>
     </div>
 
@@ -60,14 +69,14 @@
       </div>
     </div>
 
-    <script src="js/sprite.js?v=40"></script>
-    <script src="js/cell.js?v=40"></script>
-    <script src="js/grid.js?v=40"></script>
-    <script src="js/solver.js?v=40"></script>
-    <script src="js/planner.js?v=40"></script>
-    <script src="js/hint.js?v=40"></script>
-    <script src="js/save.js?v=40"></script>
-    <script src="js/chrome.js?v=40"></script>
-    <script src="js/game.js?v=40"></script>
+    <script src="js/sprite.js?v=41"></script>
+    <script src="js/cell.js?v=41"></script>
+    <script src="js/grid.js?v=41"></script>
+    <script src="js/solver.js?v=41"></script>
+    <script src="js/planner.js?v=41"></script>
+    <script src="js/hint.js?v=41"></script>
+    <script src="js/save.js?v=41"></script>
+    <script src="js/chrome.js?v=41"></script>
+    <script src="js/game.js?v=41"></script>
   </body>
 </html>
