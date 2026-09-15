@@ -193,6 +193,11 @@ Hint.prototype.twoLineTargets = function (axis, a, b, keep) {
   return out;
 };
 
+Hint.prototype.isStripDell = function (cells) {
+  if (!cells.length) return false;
+  return this.lineSet(cells, "row").length === 1 || this.lineSet(cells, "col").length === 1;
+};
+
 Hint.prototype.twoLineBatches = function (dells) {
   const ids = [];
   for (const id in dells) ids.push(+id);
@@ -201,19 +206,19 @@ Hint.prototype.twoLineBatches = function (dells) {
   const axes = ["row", "col"];
   for (let ax = 0; ax < axes.length; ax++) {
     const axis = axes[ax];
-    for (let a = 0; a < n; a++) {
-      for (let b = a + 1; b < n; b++) {
-        const contained = [];
-        for (let i = 0; i < ids.length; i++) {
-          if (this.containedIn(dells[ids[i]], axis, a, b)) contained.push(ids[i]);
-        }
-        if (contained.length !== 2) continue;
-        const keep = {};
-        keep[contained[0]] = true;
-        keep[contained[1]] = true;
-        const targets = this.twoLineTargets(axis, a, b, keep);
-        if (targets.length) batches.push(targets);
+    for (let a = 0; a < n - 1; a++) {
+      const b = a + 1;
+      const contained = [];
+      for (let i = 0; i < ids.length; i++) {
+        if (this.containedIn(dells[ids[i]], axis, a, b)) contained.push(ids[i]);
       }
+      if (contained.length !== 2) continue;
+      if (this.isStripDell(dells[contained[0]]) && this.isStripDell(dells[contained[1]])) continue;
+      const keep = {};
+      keep[contained[0]] = true;
+      keep[contained[1]] = true;
+      const targets = this.twoLineTargets(axis, a, b, keep);
+      if (targets.length) batches.push(targets);
     }
   }
   return batches;
