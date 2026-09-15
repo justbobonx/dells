@@ -65,19 +65,17 @@ function layout() {
   canvas.width = w;
   canvas.height = h;
   crisp();
-  const padTop = 56;
+  const padTop = 52;
   const padBot = 56;
-  const pad = 24;
-  const usableW = w - pad * 2;
-  const usableH = h - padTop - padBot;
+  const gap = 8;
+  const usableW = w;
+  const usableH = h - padTop - padBot - gap;
   const size = grid ? grid.n : n;
   cellSize = Math.floor(Math.min(usableW / size, usableH / size));
   if (cellSize < 16) cellSize = 16;
   const boardW = size * cellSize;
-  const boardH = size * cellSize;
-  const slack = Math.max(0, usableH - boardH);
   originX = Math.floor((w - boardW) / 2);
-  originY = Math.floor(padTop + slack / 3);
+  originY = padTop + gap;
   setSpriteFilter();
 }
 
