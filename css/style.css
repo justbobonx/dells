@@ -42,6 +42,7 @@ canvas {
 
 #hud {
   top: 0;
+  align-items: flex-end;
   padding-top: max(10px, env(safe-area-inset-top));
   background: linear-gradient(to bottom, rgba(17, 17, 17, 0.88), transparent);
 }
@@ -63,30 +64,47 @@ canvas {
 #os-count {
   font-size: 22px;
   letter-spacing: 0.08em;
+  line-height: 1;
+  padding-bottom: 2px;
 }
 
-.hud-right {
+#hud .hud-right {
   flex: 1 1 auto;
   justify-content: flex-end;
+  flex-wrap: wrap;
   min-width: 0;
-  gap: 8px;
+  gap: 10px 14px;
   font-size: 11px;
   letter-spacing: 0.08em;
 }
 
-.hud-right span {
+.hud-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1px;
+  min-width: 2.6em;
+}
+
+.hud-lbl {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  line-height: 1;
   white-space: nowrap;
 }
 
-.hud-right strong {
+.hud-stat strong {
   font-size: 13px;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
 }
 
-.hud-right strong.good {
+.hud-stat strong.good {
   color: #7dffa3;
 }
 
-.hud-right strong.bad {
+.hud-stat strong.bad {
   color: #ff6b6b;
 }
 
