@@ -4,6 +4,8 @@ const elOs = document.getElementById("os-count");
 const elCleared = document.getElementById("score-cleared");
 const elRights = document.getElementById("score-rights");
 const elWrongs = document.getElementById("score-wrongs");
+const elHud = document.getElementById("hud");
+const elHudBottom = document.getElementById("hud-bottom");
 const btnMenu = document.getElementById("btn-menu");
 const btnReset = document.getElementById("btn-reset");
 const btnHint = document.getElementById("btn-hint");
@@ -55,14 +57,20 @@ function setSpriteFilter() {
   ctx.imageSmoothingEnabled = dest < TILE;
 }
 
+function barHeight(el, fallback) {
+  if (!el) return fallback;
+  const h = Math.ceil(el.getBoundingClientRect().height);
+  return h > 0 ? h : fallback;
+}
+
 function layout() {
   const w = window.innerWidth;
   const h = window.innerHeight;
   canvas.width = w;
   canvas.height = h;
   crisp();
-  const padTop = 52;
-  const padBot = 56;
+  const padTop = Math.max(52, barHeight(elHud, 52));
+  const padBot = Math.max(56, barHeight(elHudBottom, 56));
   const gap = 8;
   const usableW = w;
   const usableH = h - padTop - padBot - gap;
@@ -331,6 +339,11 @@ function onBoardPointer(e) {
   }, TAP_MS);
 }
 
+function onViewport() {
+  layout();
+  draw();
+}
+
 btnStart.addEventListener("click", beginPlay);
 btnMenu.addEventListener("click", function () {
   if (!playing) return;
@@ -363,10 +376,10 @@ elMenu.addEventListener("click", function (e) {
 });
 canvas.addEventListener("pointerdown", onBoardPointer);
 
-window.addEventListener("resize", function () {
-  layout();
-  draw();
-});
+window.addEventListener("resize", onViewport);
+if (window.visualViewport) {
+  window.visualViewport.addEventListener("resize", onViewport);
+}
 
 document.addEventListener("visibilitychange", function () {
   if (document.visibilityState === "hidden") showTitle();
