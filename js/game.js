@@ -8,7 +8,7 @@ const elHud = document.getElementById("hud");
 const elHudBottom = document.getElementById("hud-bottom");
 const btnMenu = document.getElementById("btn-menu");
 const btnReset = document.getElementById("btn-reset");
-const btnHint = document.getElementById("btn-hint");
+const btnClear = document.getElementById("btn-clear");
 const btnNewMinus = document.getElementById("btn-new-minus");
 const btnNew = document.getElementById("btn-new");
 const btnNewPlus = document.getElementById("btn-new-plus");
@@ -174,6 +174,11 @@ function resetBoard() {
   draw();
 }
 
+function clearMarks() {
+  if (!playing || !grid) return;
+  hideMenu();
+}
+
 function applyCheckStep() {
   const result = grid.checkGuesses();
   score.rights += result.rights;
@@ -202,22 +207,6 @@ function onCheckHint() {
     return;
   }
   if (checkMode || result.wrongs > 0) {
-    finishBoardAction(true);
-    return;
-  }
-  new Hint(grid).apply();
-  finishBoardAction(true);
-}
-
-function giveHint() {
-  if (!playing || !grid) return;
-  hideMenu();
-  const result = applyCheckStep();
-  if (result.win) {
-    finishBoardAction(false);
-    return;
-  }
-  if (result.wrongs > 0) {
     finishBoardAction(true);
     return;
   }
@@ -351,7 +340,7 @@ btnMenu.addEventListener("click", function () {
   else showMenu();
 });
 btnReset.addEventListener("click", resetBoard);
-btnHint.addEventListener("click", giveHint);
+btnClear.addEventListener("click", clearMarks);
 btnNewMinus.addEventListener("click", function () {
   if (!playing) return;
   setLevel(n - 1);
