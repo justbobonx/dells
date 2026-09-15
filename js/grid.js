@@ -39,7 +39,7 @@ const DELL_COLORS = [
 
 function Grid(n) {
   this.n = n;
-  this.plan = { n: n, ponds: 0, wolf: false };
+  this.plan = { n: n, ponds: 0, wolf: false, bunny: false };
   this.tries = 0;
   this.backs = 0;
   this.unique = false;
@@ -137,7 +137,7 @@ Grid.prototype.clearCaves = function () {
       if (cell.cave || cell.wolf) {
         cell.cave = false;
         cell.wolf = false;
-        if (!cell.pond) cell.dellId = -1;
+        if (!cell.pond && !cell.bunny) cell.dellId = -1;
       }
     }
   }
@@ -163,7 +163,7 @@ Grid.prototype.caveGrowOpts = function (body) {
       const key = nr + "," + nc;
       if (seen[key]) continue;
       const cell = this.cells[nr][nc];
-      if (cell.pond || cell.cave) continue;
+      if (cell.pond || cell.cave || cell.bunny) continue;
       seen[key] = true;
       out.push({ r: nr, c: nc });
     }
@@ -177,7 +177,7 @@ Grid.prototype.placeCave = function () {
   const seeds = [];
   for (let r = 2; r < this.n - 2; r++) {
     for (let c = 2; c < this.n - 2; c++) {
-      if (!this.cells[r][c].pond) seeds.push({ r: r, c: c });
+      if (!this.cells[r][c].pond && !this.cells[r][c].bunny) seeds.push({ r: r, c: c });
     }
   }
   if (!seeds.length) return false;
@@ -209,6 +209,65 @@ Grid.prototype.nearWolf = function (row, col) {
   const wolf = this.findWolf();
   if (!wolf) return false;
   return Math.max(Math.abs(row - wolf.row), Math.abs(col - wolf.col)) <= 1;
+};
+
+Grid.prototype.clearBunny = function () {
+  for (let r = 0; r < this.n; r++) {
+    for (let c = 0; c < this.n; c++) {
+      const cell = this.cells[r][c];
+      if (cell.bunny) {
+        cell.bunny = false;
+        if (!cell.pond && !cell.cave) cell.dellId = -1;
+      }
+    }
+  }
+};
+
+Grid.prototype.findBunny = function () {
+  for (let r = 0; r < this.n; r++) {
+    for (let c = 0; c < this.n; c++) {
+      if (this.cells[r][c].bunny) return this.cells[r][c];
+    }
+  }
+  return null;
+};
+
+Grid.prototype.foxSeatOk = function (row, col) {
+  if (row < 0 || col < 0 || row >= this.n || col >= this.n) return false;
+  if (this.isHole(row, col)) return false;
+  if (this.nearWolf(row, col)) return false;
+  return true;
+};
+
+Grid.prototype.bunnySeats = function (row, col) {
+  const out = [];
+  for (let dr = -1; dr <= 1; dr++) {
+    for (let dc = -1; dc <= 1; dc++) {
+      if (!dr && !dc) continue;
+      if (this.foxSeatOk(row + dr, col + dc)) out.push({ r: row + dr, c: col + dc });
+    }
+  }
+  return out;
+};
+
+Grid.prototype.placeBunny = function () {
+  this.clearBunny();
+  if (!this.plan || !this.plan.bunny) return true;
+  const spots = [];
+  for (let r = 0; r < this.n; r++) {
+    for (let c = 0; c < this.n; c++) {
+      const cell = this.cells[r][c];
+      if (cell.pond || cell.cave) continue;
+      if (!this.bunnySeats(r, c).length) continue;
+      spots.push({ r: r, c: c });
+    }
+  }
+  if (!spots.length) return false;
+  const pick = spots[Math.floor(Math.random() * spots.length)];
+  const cell = this.cells[pick.r][pick.c];
+  cell.bunny = true;
+  this.markHole(cell);
+  return true;
 };
 
 Grid.prototype.setSprite = function (row, col, id) {
@@ -266,7 +325,7 @@ Grid.prototype.checkGuesses = function () {
   for (let r = 0; r < this.n; r++) {
     for (let c = 0; c < this.n; c++) {
       const cell = this.cells[r][c];
-      if (cell.pond || cell.cave) continue;
+      if (cell.pond || cell.cave || cell.bunny) continue;
       if (cell.guessId === "o") {
         if (cell.spriteId === "o") {
           found++;
@@ -303,6 +362,7 @@ Grid.prototype.dump = function () {
         pond: !!cell.pond,
         cave: !!cell.cave,
         wolf: !!cell.wolf,
+        bunny: !!cell.bunny,
       });
     }
   }
@@ -320,7 +380,7 @@ Grid.load = function (data) {
   const grid = new Grid(data.n);
   grid.unique = !!data.unique;
   grid.wolfShown = !!data.wolfShown;
-  grid.plan = data.plan || { n: data.n, ponds: 0, wolf: false };
+  grid.plan = data.plan || { n: data.n, ponds: 0, wolf: false, bunny: false };
   let i = 0;
   for (let r = 0; r < data.n; r++) {
     for (let c = 0; c < data.n; c++) {
@@ -334,7 +394,8 @@ Grid.load = function (data) {
       cell.pond = !!src.pond;
       cell.cave = !!src.cave || (!!src.wolf && !src.pond);
       cell.wolf = !!src.wolf;
-      if (cell.pond || cell.cave) {
+      cell.bunny = !!src.bunny;
+      if (cell.pond || cell.cave || cell.bunny) {
         cell.dellId = HOLE_DELL;
         cell.spriteId = null;
       }
@@ -370,6 +431,18 @@ Grid.prototype.tryPlaceOs = function () {
   for (let i = 0; i < this.n; i++) {
     rows.push(i);
     cols.push(i);
+  }
+  const bunny = this.findBunny();
+  if (bunny) {
+    const seats = this.bunnySeats(bunny.row, bunny.col);
+    if (!seats.length) return false;
+    const seat = seats[Math.floor(Math.random() * seats.length)];
+    this.cells[seat.r][seat.c].setSprite("o");
+    const ri = rows.indexOf(seat.r);
+    const ci = cols.indexOf(seat.c);
+    if (ri < 0 || ci < 0) return false;
+    rows.splice(ri, 1);
+    cols.splice(ci, 1);
   }
   while (rows.length) {
     const opts = [];
@@ -437,7 +510,7 @@ Grid.prototype.tryPaintDells = function () {
   for (let r = 0; r < n; r++) {
     for (let c = 0; c < n; c++) {
       const cell = this.cells[r][c];
-      cell.dellId = cell.pond || cell.cave ? HOLE_DELL : -1;
+      cell.dellId = cell.pond || cell.cave || cell.bunny ? HOLE_DELL : -1;
     }
   }
 
@@ -562,7 +635,7 @@ Grid.prototype.dellColor = function (dellId) {
 };
 
 Grid.prototype.rebuild = function (plan) {
-  this.plan = plan || this.plan || { n: this.n, ponds: 0, wolf: false };
+  this.plan = plan || this.plan || { n: this.n, ponds: 0, wolf: false, bunny: false };
   this.unique = false;
   this.wolfShown = false;
   this.tries = 0;
@@ -571,6 +644,7 @@ Grid.prototype.rebuild = function (plan) {
     this.tries++;
     if (!this.placePonds()) continue;
     if (!this.placeCave()) continue;
+    if (!this.placeBunny()) continue;
     this.placeOs();
     this.paintDells();
     if (new Solver(this).count(2) === 1) {
