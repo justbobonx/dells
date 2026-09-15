@@ -162,6 +162,13 @@ Cell.prototype.drawMark = function (ctx, sprites, x, y, s, revealWolf) {
     return;
   }
   if (this.guessId === "x") {
+    if (this.locked) {
+      const print = sprites.get("p");
+      if (print) {
+        print.draw(ctx, px, py, box);
+        return;
+      }
+    }
     const g = sprites.get("x");
     if (!g) return;
     ctx.fillStyle = look.glyphColor || g.color || "#2a2118";
