@@ -197,8 +197,12 @@ Cell.prototype.draw = function (ctx, sprites, x, y, s, revealWolf) {
     this.strokeRound(ctx, x + 1, y + 1, s - 2, s - 2, corners);
   }
   this.drawMark(ctx, sprites, x, y, s, revealWolf);
-  if (this.locked || this.wrong) {
-    ctx.strokeStyle = this.locked ? "#7dffa3" : "#e23b3b";
+  if (this.wrong) {
+    ctx.strokeStyle = "#e23b3b";
+    ctx.lineWidth = Math.max(2, Math.floor(s * 0.07));
+    this.strokeRound(ctx, x + 1, y + 1, s - 2, s - 2, corners);
+  } else if (this.locked && this.guessId === "o") {
+    ctx.strokeStyle = "#7dffa3";
     ctx.lineWidth = Math.max(2, Math.floor(s * 0.07));
     this.strokeRound(ctx, x + 1, y + 1, s - 2, s - 2, corners);
   }
