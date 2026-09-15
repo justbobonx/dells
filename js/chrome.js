@@ -19,6 +19,16 @@ PlayChrome.prototype.requestFullscreen = function () {
   return Promise.resolve();
 };
 
+PlayChrome.prototype.exitFullscreen = function () {
+  if (!this.isFullscreen()) return;
+  const ex = document.exitFullscreen || document.webkitExitFullscreen || document.webkitCancelFullScreen;
+  if (!ex) return;
+  try {
+    const p = ex.call(document);
+    if (p && typeof p.catch === "function") p.catch(function () {});
+  } catch (err) {}
+};
+
 PlayChrome.prototype.requestWakeLock = function () {
   const api = navigator.wakeLock;
   if (!api || typeof api.request !== "function") return Promise.resolve();
@@ -34,10 +44,25 @@ PlayChrome.prototype.requestWakeLock = function () {
     .catch(function () {});
 };
 
+PlayChrome.prototype.releaseWakeLock = function () {
+  const lock = this.wakeLock;
+  this.wakeLock = null;
+  if (lock && typeof lock.release === "function") {
+    try {
+      lock.release();
+    } catch (err) {}
+  }
+};
+
 PlayChrome.prototype.enter = function () {
   const self = this;
   const fs = this.isFullscreen() ? Promise.resolve() : this.requestFullscreen();
   return fs.then(function () {
     return self.requestWakeLock();
   });
+};
+
+PlayChrome.prototype.leave = function () {
+  this.releaseWakeLock();
+  this.exitFullscreen();
 };
