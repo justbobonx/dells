@@ -6,6 +6,7 @@ const elRights = document.getElementById("score-rights");
 const elWrongs = document.getElementById("score-wrongs");
 const elHud = document.getElementById("hud");
 const elHudBottom = document.getElementById("hud-bottom");
+const elWinTime = document.getElementById("win-time");
 const btnMenu = document.getElementById("btn-menu");
 const btnReset = document.getElementById("btn-reset");
 const btnClear = document.getElementById("btn-clear");
@@ -35,6 +36,8 @@ let tapTimer = 0;
 let tapCell = null;
 let playing = false;
 let score = Save.readScore();
+let clockElapsed = 0;
+let clockStarted = 0;
 
 function clamp(n, lo, hi) {
   return Math.max(lo, Math.min(hi, n));
@@ -61,6 +64,39 @@ function barHeight(el, fallback) {
   if (!el) return fallback;
   const h = Math.ceil(el.getBoundingClientRect().height);
   return h > 0 ? h : fallback;
+}
+
+function clockReset() {
+  clockElapsed = 0;
+  clockStarted = Date.now();
+}
+
+function clockLoad(ms) {
+  clockElapsed = ms > 0 ? ms | 0 : 0;
+  clockStarted = Date.now();
+}
+
+function clockOff() {
+  if (!clockStarted) return;
+  clockElapsed += Date.now() - clockStarted;
+  clockStarted = 0;
+}
+
+function clockNow() {
+  if (!clockStarted) return clockElapsed;
+  return clockElapsed + (Date.now() - clockStarted);
+}
+
+function formatClock(ms) {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const s = total % 60;
+  const m = Math.floor(total / 60) % 60;
+  const h = Math.floor(total / 3600);
+  const pad = function (n) {
+    return (n < 10 ? "0" : "") + n;
+  };
+  if (h) return h + ":" + pad(m) + ":" + pad(s);
+  return m + ":" + pad(s);
 }
 
 function layout() {
@@ -118,7 +154,9 @@ function persistBoard() {
     Save.clearBoard();
     return;
   }
-  Save.writeBoard(grid.dump());
+  const data = grid.dump();
+  data.elapsedMs = clockNow();
+  Save.writeBoard(data);
 }
 
 function persistScore() {
@@ -157,6 +195,7 @@ function newBoard() {
   grid = new Grid(plan.n);
   grid.rebuild(plan);
   dress(grid);
+  clockReset();
   persistBoard();
   showBoard();
 }
@@ -185,6 +224,8 @@ function applyCheckStep() {
   score.wrongs += result.wrongs;
   if (result.win) {
     score.cleared += 1;
+    if (elWinTime) elWinTime.textContent = formatClock(clockNow());
+    clockOff();
     Save.clearBoard();
     elWin.hidden = false;
   }
@@ -227,12 +268,16 @@ function restoreBoard() {
   grid = loaded;
   n = grid.n;
   Save.writeSize(n);
+  clockLoad(data.elapsedMs || 0);
   showBoard();
   return true;
 }
 
 function showTitle() {
-  if (playing) persistBoard();
+  if (playing) {
+    persistBoard();
+    clockOff();
+  }
   playing = false;
   hideWin();
   hideMenu();
