@@ -23,12 +23,6 @@ const sprites = SpriteBank.defaults(function () {
 const playChrome = new PlayChrome();
 const planner = new Planner();
 const TAP_MS = 280;
-const POND_FILL = "#0D1E35";
-const POND_EDGE = "#1E6FA9";
-const CAVE_FILL = "#2a2a22";
-const CAVE_EDGE = "#777777";
-const BUNNY_FILL = "#44571E";
-const BUNNY_EDGE = "#A4C85B";
 
 let n = Save.readSize();
 let grid = null;
@@ -94,6 +88,10 @@ function showMenu() {
   elMenu.hidden = false;
 }
 
+function dress(g) {
+  Skin.dress(g || grid);
+}
+
 function isClearedGrid(g) {
   if (!g) return false;
   let locked = 0;
@@ -143,6 +141,7 @@ function newBoard() {
   const plan = planner.roll(n);
   grid = new Grid(plan.n);
   grid.rebuild(plan);
+  dress(grid);
   persistBoard();
   showBoard();
 }
@@ -173,6 +172,7 @@ function restoreBoard() {
     Save.clearBoard();
     return false;
   }
+  dress(loaded);
   grid = loaded;
   n = grid.n;
   Save.writeSize(n);
@@ -201,128 +201,18 @@ function beginPlay() {
   });
 }
 
-function capRadii(w, h, rad) {
-  const max = Math.min(w, h) / 2;
-  if (typeof rad === "number") return Math.min(Math.max(0, rad), max);
-  const out = [];
-  for (let i = 0; i < 4; i++) out.push(Math.min(Math.max(0, rad[i] || 0), max));
-  return out;
-}
-
-function fillRound(x, y, w, h, rad) {
-  const r = capRadii(w, h, rad);
-  if (ctx.roundRect) {
-    ctx.beginPath();
-    ctx.roundRect(x, y, w, h, r);
-    ctx.fill();
-    return;
-  }
-  ctx.fillRect(x, y, w, h);
-}
-
-function strokeRound(x, y, w, h, rad) {
-  const r = capRadii(w, h, rad);
-  if (ctx.roundRect) {
-    ctx.beginPath();
-    ctx.roundRect(x, y, w, h, r);
-    ctx.stroke();
-    return;
-  }
-  ctx.strokeRect(x, y, w, h);
-}
-
-function samePatch(row, col, cell) {
-  if (row < 0 || col < 0 || row >= grid.n || col >= grid.n) return false;
-  const other = grid.at(row, col);
-  if (cell.pond) return !!other.pond;
-  if (cell.cave) return !!other.cave;
-  if (cell.bunny) return !!other.bunny;
-  return !other.pond && !other.cave && !other.bunny && other.dellId === cell.dellId;
-}
-
-function cellRadii(row, col, cell, rad) {
-  const up = samePatch(row - 1, col, cell);
-  const down = samePatch(row + 1, col, cell);
-  const left = samePatch(row, col - 1, cell);
-  const right = samePatch(row, col + 1, cell);
-  return [
-    up || left ? 0 : rad,
-    up || right ? 0 : rad,
-    down || right ? 0 : rad,
-    down || left ? 0 : rad,
-  ];
-}
-
-function drawSprite(sprite, x, y, s) {
-  if (!sprite) return;
-  const pad = Math.max(0, Math.floor(s * 0.06));
-  sprite.draw(ctx, x + pad, y + pad, Math.max(1, s - pad * 2));
-}
-
 function draw() {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.fillStyle = "#111111";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   if (!grid) return;
-
   const inset = Math.max(1, Math.floor(cellSize * 0.06));
-  const rad = Math.max(4, Math.floor(cellSize * 0.16));
-  const checkW = Math.max(2, Math.floor(cellSize * 0.06));
-  const waterW = Math.max(1, Math.floor(checkW * 0.45));
+  const s = cellSize - inset * 2;
   for (let r = 0; r < grid.n; r++) {
     for (let c = 0; c < grid.n; c++) {
-      const cell = grid.at(r, c);
       const x = originX + c * cellSize + inset;
       const y = originY + r * cellSize + inset;
-      const s = cellSize - inset * 2;
-      const corners = cellRadii(r, c, cell, rad);
-
-      if (cell.pond) {
-        ctx.fillStyle = POND_FILL;
-        fillRound(x, y, s, s, corners);
-        ctx.strokeStyle = POND_EDGE;
-        ctx.lineWidth = waterW;
-        strokeRound(x + 1, y + 1, s - 2, s - 2, corners);
-        continue;
-      }
-
-      if (cell.cave) {
-        ctx.fillStyle = CAVE_FILL;
-        fillRound(x, y, s, s, corners);
-        ctx.strokeStyle = CAVE_EDGE;
-        ctx.lineWidth = waterW;
-        strokeRound(x + 1, y + 1, s - 2, s - 2, corners);
-        const showWolf = cell.wolf && (grid.wolfShown || cell.guessId === "w");
-        const mark = showWolf ? "w" : cell.guessId === "x" ? "xl" : cell.guessId;
-        drawSprite(sprites.get(mark), x, y, s);
-        if (cell.locked || cell.wrong) {
-          ctx.strokeStyle = cell.locked ? "#7dffa3" : "#e23b3b";
-          ctx.lineWidth = checkW;
-          strokeRound(x + 1, y + 1, s - 2, s - 2, corners);
-        }
-        continue;
-      }
-
-      if (cell.bunny) {
-        ctx.fillStyle = BUNNY_FILL;
-        fillRound(x, y, s, s, corners);
-        ctx.strokeStyle = BUNNY_EDGE;
-        ctx.lineWidth = waterW;
-        strokeRound(x + 1, y + 1, s - 2, s - 2, corners);
-        drawSprite(sprites.get("b"), x, y, s);
-        continue;
-      }
-
-      ctx.fillStyle = grid.dellColor(cell.dellId);
-      fillRound(x, y, s, s, corners);
-
-      drawSprite(sprites.get(cell.guessId), x, y, s);
-
-      if (cell.locked || cell.wrong) {
-        ctx.strokeStyle = cell.locked ? "#7dffa3" : "#e23b3b";
-        ctx.lineWidth = checkW;
-        strokeRound(x + 1, y + 1, s - 2, s - 2, corners);
-      }
+      grid.at(r, c).draw(ctx, sprites, x, y, s, grid.wolfShown);
     }
   }
 }
@@ -344,7 +234,7 @@ function sameCell(a, b) {
 
 function applySingle(hit) {
   const cell = grid.at(hit.row, hit.col);
-  if (cell.pond || cell.bunny || cell.locked) return;
+  if (!cell.canTap()) return;
   if (!cell.guessId) cell.setGuess("x");
   else cell.setGuess(null);
   paintScore();
@@ -354,8 +244,8 @@ function applySingle(hit) {
 
 function applyDouble(hit) {
   const cell = grid.at(hit.row, hit.col);
-  if (cell.pond || cell.bunny || cell.locked) return;
-  cell.setGuess(cell.cave ? "w" : "o");
+  if (!cell.canTap()) return;
+  cell.setGuess("o");
   paintScore();
   persistBoard();
   draw();
