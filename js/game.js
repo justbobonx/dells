@@ -21,6 +21,7 @@ const sprites = SpriteBank.defaults(function () {
   draw();
 });
 const playChrome = new PlayChrome();
+const planner = new Planner();
 const TAP_MS = 280;
 const POND_FILL = "#0D1E35";
 const POND_EDGE = "#15537F";
@@ -123,8 +124,9 @@ function newBoard() {
   hideWin();
   hideMenu();
   setLevel(n);
-  grid = new Grid(n);
-  grid.rebuild();
+  const plan = planner.roll(n);
+  grid = new Grid(plan.n);
+  grid.rebuild(plan);
   persistBoard();
   showBoard();
 }
