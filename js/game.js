@@ -27,6 +27,8 @@ const POND_FILL = "#0D1E35";
 const POND_EDGE = "#15537F";
 const CAVE_FILL = "#2a2a22";
 const CAVE_EDGE = "#777777";
+const BUNNY_FILL = "#6d8f4e";
+const BUNNY_EDGE = "#c4e08a";
 
 let n = Save.readSize();
 let grid = null;
@@ -234,7 +236,8 @@ function samePatch(row, col, cell) {
   const other = grid.at(row, col);
   if (cell.pond) return !!other.pond;
   if (cell.cave) return !!other.cave;
-  return !other.pond && !other.cave && other.dellId === cell.dellId;
+  if (cell.bunny) return !!other.bunny;
+  return !other.pond && !other.cave && !other.bunny && other.dellId === cell.dellId;
 }
 
 function cellRadii(row, col, cell, rad) {
@@ -300,6 +303,16 @@ function draw() {
         continue;
       }
 
+      if (cell.bunny) {
+        ctx.fillStyle = BUNNY_FILL;
+        fillRound(x, y, s, s, corners);
+        ctx.strokeStyle = BUNNY_EDGE;
+        ctx.lineWidth = waterW;
+        strokeRound(x + 1, y + 1, s - 2, s - 2, corners);
+        drawSprite(sprites.get("b"), x, y, s);
+        continue;
+      }
+
       ctx.fillStyle = grid.dellColor(cell.dellId);
       fillRound(x, y, s, s, corners);
 
@@ -331,7 +344,7 @@ function sameCell(a, b) {
 
 function applySingle(hit) {
   const cell = grid.at(hit.row, hit.col);
-  if (cell.pond || cell.locked) return;
+  if (cell.pond || cell.bunny || cell.locked) return;
   if (!cell.guessId) cell.setGuess("x");
   else cell.setGuess(null);
   paintScore();
@@ -341,7 +354,7 @@ function applySingle(hit) {
 
 function applyDouble(hit) {
   const cell = grid.at(hit.row, hit.col);
-  if (cell.pond || cell.locked) return;
+  if (cell.pond || cell.bunny || cell.locked) return;
   cell.setGuess(cell.cave ? "w" : "o");
   paintScore();
   persistBoard();
