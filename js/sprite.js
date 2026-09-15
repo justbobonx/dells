@@ -62,6 +62,6 @@ SpriteBank.defaults = function (onReady) {
   }
   fox.load("images/fox.png", tick);
   wolf.load("images/wolf.png", tick);
-  bunny.load("images/bunny.png", tick);
+  bunny.load("images/bunnies.png", tick);
   return bank;
 };
