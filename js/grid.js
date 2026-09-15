@@ -39,6 +39,7 @@ const DELL_COLORS = [
 
 function Grid(n) {
   this.n = n;
+  this.plan = { n: n, ponds: 0, wolf: false };
   this.tries = 0;
   this.backs = 0;
   this.unique = false;
@@ -84,11 +85,17 @@ Grid.prototype.clearPonds = function () {
   }
 };
 
-/** 6: none. 7+: half the time a 2x2 or 2x3 (either way). */
-Grid.prototype.placePond = function () {
-  this.clearPonds();
-  if (this.n < 7) return false;
-  if (Math.random() >= 0.5) return false;
+Grid.prototype.pondFits = function (r0, c0, h, w) {
+  if (r0 < 0 || c0 < 0 || r0 + h > this.n || c0 + w > this.n) return false;
+  for (let r = r0; r < r0 + h; r++) {
+    for (let c = c0; c < c0 + w; c++) {
+      if (this.cells[r][c].pond || this.cells[r][c].cave) return false;
+    }
+  }
+  return true;
+};
+
+Grid.prototype.tryPlaceOnePond = function () {
   const shapes = [
     [2, 2],
     [2, 3],
@@ -97,14 +104,28 @@ Grid.prototype.placePond = function () {
   const shape = shapes[Math.floor(Math.random() * shapes.length)];
   const h = shape[0];
   const w = shape[1];
-  if (h > this.n || w > this.n) return false;
-  const r0 = Math.floor(Math.random() * (this.n - h + 1));
-  const c0 = Math.floor(Math.random() * (this.n - w + 1));
-  for (let r = r0; r < r0 + h; r++) {
-    for (let c = c0; c < c0 + w; c++) {
+  const spots = [];
+  for (let r = 0; r <= this.n - h; r++) {
+    for (let c = 0; c <= this.n - w; c++) {
+      if (this.pondFits(r, c, h, w)) spots.push({ r: r, c: c });
+    }
+  }
+  if (!spots.length) return false;
+  const pick = spots[Math.floor(Math.random() * spots.length)];
+  for (let r = pick.r; r < pick.r + h; r++) {
+    for (let c = pick.c; c < pick.c + w; c++) {
       this.cells[r][c].pond = true;
       this.markHole(this.cells[r][c]);
     }
+  }
+  return true;
+};
+
+Grid.prototype.placePonds = function () {
+  this.clearPonds();
+  const want = this.plan && this.plan.ponds ? this.plan.ponds : 0;
+  for (let i = 0; i < want; i++) {
+    if (!this.tryPlaceOnePond()) return false;
   }
   return true;
 };
@@ -150,11 +171,9 @@ Grid.prototype.caveGrowOpts = function (body) {
   return out;
 };
 
-/** 8+: half the time. 2-4 cave tiles from an inner seed. One hidden wolf inside. */
 Grid.prototype.placeCave = function () {
   this.clearCaves();
-  if (this.n < 8) return false;
-  if (Math.random() >= 0.5) return false;
+  if (!this.plan || !this.plan.wolf) return true;
   const seeds = [];
   for (let r = 2; r < this.n - 2; r++) {
     for (let c = 2; c < this.n - 2; c++) {
@@ -287,7 +306,13 @@ Grid.prototype.dump = function () {
       });
     }
   }
-  return { n: this.n, unique: this.unique, wolfShown: !!this.wolfShown, cells: cells };
+  return {
+    n: this.n,
+    unique: this.unique,
+    wolfShown: !!this.wolfShown,
+    plan: this.plan,
+    cells: cells,
+  };
 };
 
 Grid.load = function (data) {
@@ -295,6 +320,7 @@ Grid.load = function (data) {
   const grid = new Grid(data.n);
   grid.unique = !!data.unique;
   grid.wolfShown = !!data.wolfShown;
+  grid.plan = data.plan || { n: data.n, ponds: 0, wolf: false };
   let i = 0;
   for (let r = 0; r < data.n; r++) {
     for (let c = 0; c < data.n; c++) {
@@ -535,15 +561,16 @@ Grid.prototype.dellColor = function (dellId) {
   return DELL_COLORS[((dellId % DELL_COLORS.length) + DELL_COLORS.length) % DELL_COLORS.length];
 };
 
-Grid.prototype.rebuild = function () {
+Grid.prototype.rebuild = function (plan) {
+  this.plan = plan || this.plan || { n: this.n, ponds: 0, wolf: false };
   this.unique = false;
   this.wolfShown = false;
   this.tries = 0;
   this.backs = 0;
   for (let t = 0; t < UNIQUE_TRIES; t++) {
     this.tries++;
-    this.placePond();
-    this.placeCave();
+    if (!this.placePonds()) continue;
+    if (!this.placeCave()) continue;
     this.placeOs();
     this.paintDells();
     if (new Solver(this).count(2) === 1) {
