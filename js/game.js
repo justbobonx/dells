@@ -24,11 +24,11 @@ const playChrome = new PlayChrome();
 const planner = new Planner();
 const TAP_MS = 280;
 const POND_FILL = "#0D1E35";
-const POND_EDGE = "#15537F";
+const POND_EDGE = "#1E6FA9";
 const CAVE_FILL = "#2a2a22";
 const CAVE_EDGE = "#777777";
-const BUNNY_FILL = "#6d8f4e";
-const BUNNY_EDGE = "#c4e08a";
+const BUNNY_FILL = "#44571E";
+const BUNNY_EDGE = "#A4C85B";
 
 let n = Save.readSize();
 let grid = null;
