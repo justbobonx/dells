@@ -141,7 +141,7 @@ Cell.prototype.strokeRound = function (ctx, x, y, w, h, rad) {
   ctx.strokeRect(x, y, w, h);
 };
 
-Cell.prototype.drawMark = function (ctx, sprites, x, y, s, shown) {
+Cell.prototype.drawMark = function (ctx, sprites, x, y, s, revealWolf) {
   const look = this.look || CELL_TYPES[this.type] || CELL_TYPES.grass;
   const pad = Math.max(0, Math.floor(s * 0.06));
   const box = Math.max(1, s - pad * 2);
@@ -151,11 +151,10 @@ Cell.prototype.drawMark = function (ctx, sprites, x, y, s, shown) {
     const stand = sprites.get(look.stand);
     if (stand) stand.draw(ctx, px, py, box);
   }
-  const wolfHere = this.is("cave") && shown;
-  if (this.is("cave") && (this.guessId === "o" || wolfHere)) {
+  if (this.is("cave") && (this.guessId === "o" || revealWolf)) {
     const sprite = sprites.get(look.markO || "w");
-    if (sprite && (this.guessId === "o" || wolfHere)) sprite.draw(ctx, px, py, box);
-    if (this.guessId === "o" || wolfHere) return;
+    if (sprite) sprite.draw(ctx, px, py, box);
+    return;
   }
   if (this.guessId === "o") {
     const sprite = sprites.get(look.markO || "o");
@@ -173,7 +172,7 @@ Cell.prototype.drawMark = function (ctx, sprites, x, y, s, shown) {
   }
 };
 
-Cell.prototype.draw = function (ctx, sprites, x, y, s, shown) {
+Cell.prototype.draw = function (ctx, sprites, x, y, s, revealWolf) {
   const look = this.look || CELL_TYPES[this.type] || CELL_TYPES.grass;
   const rad = Math.max(4, Math.floor(s * 0.17));
   const corners = [
@@ -190,7 +189,7 @@ Cell.prototype.draw = function (ctx, sprites, x, y, s, shown) {
     ctx.lineWidth = Math.max(1, Math.floor(checkW * (look.edgeFrac || 0.45)));
     this.strokeRound(ctx, x + 1, y + 1, s - 2, s - 2, corners);
   }
-  this.drawMark(ctx, sprites, x, y, s, shown && this.isWolf && this.isWolf());
+  this.drawMark(ctx, sprites, x, y, s, revealWolf);
   if (this.locked || this.wrong) {
     ctx.strokeStyle = this.locked ? "#7dffa3" : "#e23b3b";
     ctx.lineWidth = Math.max(2, Math.floor(s * 0.07));
