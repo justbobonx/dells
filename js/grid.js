@@ -250,15 +250,32 @@ Grid.prototype.bunnySeats = function (row, col) {
   return out;
 };
 
+Grid.prototype.bunnyPairs = function (row, col) {
+  const seats = this.bunnySeats(row, col);
+  const out = [];
+  for (let i = 0; i < seats.length; i++) {
+    for (let j = i + 1; j < seats.length; j++) {
+      const a = seats[i];
+      const b = seats[j];
+      if (a.r === b.r || a.c === b.c) continue;
+      if (Math.max(Math.abs(a.r - b.r), Math.abs(a.c - b.c)) < 2) continue;
+      out.push([a, b]);
+    }
+  }
+  return out;
+};
+
 Grid.prototype.placeBunny = function () {
   this.clearBunny();
   if (!this.plan || !this.plan.bunny) return true;
+  const last = this.n - 1;
   const spots = [];
   for (let r = 0; r < this.n; r++) {
     for (let c = 0; c < this.n; c++) {
+      if ((r === 0 || r === last) && (c === 0 || c === last)) continue;
       const cell = this.cells[r][c];
       if (cell.pond || cell.cave) continue;
-      if (!this.bunnySeats(r, c).length) continue;
+      if (!this.bunnyPairs(r, c).length) continue;
       spots.push({ r: r, c: c });
     }
   }
@@ -434,15 +451,18 @@ Grid.prototype.tryPlaceOs = function () {
   }
   const bunny = this.findBunny();
   if (bunny) {
-    const seats = this.bunnySeats(bunny.row, bunny.col);
-    if (!seats.length) return false;
-    const seat = seats[Math.floor(Math.random() * seats.length)];
-    this.cells[seat.r][seat.c].setSprite("o");
-    const ri = rows.indexOf(seat.r);
-    const ci = cols.indexOf(seat.c);
-    if (ri < 0 || ci < 0) return false;
-    rows.splice(ri, 1);
-    cols.splice(ci, 1);
+    const pairs = this.bunnyPairs(bunny.row, bunny.col);
+    if (!pairs.length) return false;
+    const pair = pairs[Math.floor(Math.random() * pairs.length)];
+    for (let i = 0; i < pair.length; i++) {
+      const seat = pair[i];
+      this.cells[seat.r][seat.c].setSprite("o");
+      const ri = rows.indexOf(seat.r);
+      const ci = cols.indexOf(seat.c);
+      if (ri < 0 || ci < 0) return false;
+      rows.splice(ri, 1);
+      cols.splice(ci, 1);
+    }
   }
   while (rows.length) {
     const opts = [];
