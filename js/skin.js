@@ -1,6 +1,6 @@
 /** Presentation lookup. Grid stays data. */
 
-const DELL_COLORS = [
+const SKIN_DELL_COLORS = [
   "#6b8f4e",
   "#8a6b3f",
   "#4e7a6b",
@@ -66,7 +66,7 @@ Skin.type = function (name) {
 };
 
 Skin.dellFill = function (dellId) {
-  return DELL_COLORS[((dellId % DELL_COLORS.length) + DELL_COLORS.length) % DELL_COLORS.length];
+  return SKIN_DELL_COLORS[((dellId % SKIN_DELL_COLORS.length) + SKIN_DELL_COLORS.length) % SKIN_DELL_COLORS.length];
 };
 
 Skin.samePatch = function (grid, cell, row, col) {
