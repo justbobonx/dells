@@ -32,8 +32,8 @@ canvas {
   justify-content: space-between;
   align-items: center;
   padding: 10px 16px;
-  padding-left: max(16px, env(safe-area-inset-left));
-  padding-right: max(16px, env(safe-area-inset-right));
+  padding-left: max(10px, env(safe-area-inset-left));
+  padding-right: max(12px, env(safe-area-inset-right));
   letter-spacing: 0.12em;
   font-size: 13px;
   color: #c5d0dc;
