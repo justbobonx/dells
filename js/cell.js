@@ -26,7 +26,7 @@ Cell.prototype.setSpecial = function (id) {
 };
 
 Cell.prototype.isHole = function () {
-  return this.pond || this.cave || this.bunny || this.dellId === HOLE_DELL;
+  return this.pond || this.cave || this.bunny;
 };
 
 Cell.prototype.canTap = function () {
@@ -91,7 +91,7 @@ Cell.prototype.strokeRound = function (ctx, x, y, w, h, rad) {
   ctx.strokeRect(x, y, w, h);
 };
 
-Cell.prototype.drawMark = function (ctx, sprites, x, y, s) {
+Cell.prototype.drawMark = function (ctx, sprites, x, y, s, shown) {
   const look = this.look || {};
   const pad = Math.max(0, Math.floor(s * 0.06));
   const box = Math.max(1, s - pad * 2);
@@ -101,15 +101,13 @@ Cell.prototype.drawMark = function (ctx, sprites, x, y, s) {
     const stand = sprites.get(look.stand);
     if (stand) stand.draw(ctx, px, py, box);
   }
-  const showWolf = this.cave && this.wolf && this.guessId === "o";
-  if (this.guessId === "o") {
-    const id = look.markO || "o";
-    const sprite = sprites.get(id);
+  if (this.cave && this.wolf && (shown || this.guessId === "o")) {
+    const sprite = sprites.get("w");
     if (sprite) sprite.draw(ctx, px, py, box);
     return;
   }
-  if (showWolf) {
-    const sprite = sprites.get("w");
+  if (this.guessId === "o") {
+    const sprite = sprites.get(look.markO || "o");
     if (sprite) sprite.draw(ctx, px, py, box);
     return;
   }
@@ -141,12 +139,7 @@ Cell.prototype.draw = function (ctx, sprites, x, y, s, shown) {
     ctx.lineWidth = Math.max(1, Math.floor(checkW * (look.edgeFrac || 0.45)));
     this.strokeRound(ctx, x + 1, y + 1, s - 2, s - 2, corners);
   }
-  if (shown && this.cave && this.wolf && this.guessId !== "o") {
-    const pad = Math.max(0, Math.floor(s * 0.06));
-    const wolf = sprites.get("w");
-    if (wolf) wolf.draw(ctx, x + pad, y + pad, Math.max(1, s - pad * 2));
-  }
-  this.drawMark(ctx, sprites, x, y, s);
+  this.drawMark(ctx, sprites, x, y, s, shown);
   if (this.locked || this.wrong) {
     ctx.strokeStyle = this.locked ? "#7dffa3" : "#e23b3b";
     ctx.lineWidth = Math.max(2, Math.floor(s * 0.07));
