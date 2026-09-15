@@ -49,7 +49,13 @@ function setLevel(size) {
 
 function crisp() {
   canvas.style.imageRendering = "pixelated";
-  ctx.imageSmoothingEnabled = false;
+}
+
+function setSpriteFilter() {
+  const inset = Math.max(1, Math.floor(cellSize * 0.06));
+  const tile = cellSize - inset * 2;
+  const dest = Math.max(1, tile - Math.max(0, Math.floor(tile * 0.06)) * 2);
+  ctx.imageSmoothingEnabled = dest < TILE;
 }
 
 function layout() {
@@ -71,6 +77,7 @@ function layout() {
   const slack = Math.max(0, usableH - boardH);
   originX = Math.floor((w - boardW) / 2);
   originY = Math.floor(padTop + slack / 3);
+  setSpriteFilter();
 }
 
 function hideWin() {
@@ -230,15 +237,12 @@ function draw() {
   const rad = Math.max(4, Math.floor(cellSize * 0.16));
   const checkW = Math.max(2, Math.floor(cellSize * 0.06));
   const waterW = Math.max(1, Math.floor(checkW * 0.45));
-  const tile = cellSize - inset * 2;
-  const dest = Math.max(1, tile - Math.max(0, Math.floor(tile * 0.06)) * 2);
-  ctx.imageSmoothingEnabled = dest < TILE;
   for (let r = 0; r < grid.n; r++) {
     for (let c = 0; c < grid.n; c++) {
       const cell = grid.at(r, c);
       const x = originX + c * cellSize + inset;
       const y = originY + r * cellSize + inset;
-      const s = tile;
+      const s = cellSize - inset * 2;
       const corners = cellRadii(r, c, cell, rad);
 
       if (cell.pond) {
