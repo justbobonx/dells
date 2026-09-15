@@ -11,6 +11,7 @@ function Cell(row, col) {
   this.pond = false;
   this.cave = false;
   this.wolf = false;
+  this.bunny = false;
 }
 
 Cell.prototype.setSprite = function (id) {
