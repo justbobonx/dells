@@ -7,5 +7,6 @@ Planner.prototype.roll = function (n) {
     n: n,
     ponds: n >= 7 && Math.random() < 0.5 ? 1 : 0,
     wolf: n >= 8 && Math.random() < 0.5,
+    bunny: n >= 8 && Math.random() < 0.5,
   };
 };
