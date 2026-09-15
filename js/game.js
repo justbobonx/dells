@@ -89,7 +89,7 @@ function showMenu() {
 }
 
 function dress(g) {
-  Skin.dress(g || grid);
+  Cell.dressGrid(g || grid);
 }
 
 function isClearedGrid(g) {
@@ -212,7 +212,8 @@ function draw() {
     for (let c = 0; c < grid.n; c++) {
       const x = originX + c * cellSize + inset;
       const y = originY + r * cellSize + inset;
-      grid.at(r, c).draw(ctx, sprites, x, y, s, grid.wolfShown);
+      const reveal = grid.wolfShown && grid.isWolfAt(r, c);
+      grid.at(r, c).draw(ctx, sprites, x, y, s, reveal);
     }
   }
 }
