@@ -196,8 +196,15 @@ canvas {
 }
 
 .win-panel h1 {
-  margin: 0 0 12px;
+  margin: 0 0 4px;
   font-size: 28px;
+}
+
+#win-time {
+  margin: 0 0 12px;
+  letter-spacing: 0.16em;
+  font: 600 16px system-ui, sans-serif;
+  color: #c5d0dc;
 }
 
 #btn-start {
