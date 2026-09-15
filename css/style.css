@@ -60,12 +60,26 @@ canvas {
   pointer-events: auto;
 }
 
-.hud-left {
+#os-count {
   font-size: 22px;
+  letter-spacing: 0.08em;
+}
+
+.hud-right {
+  flex: 1 1 auto;
+  justify-content: flex-end;
+  min-width: 0;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+
+.hud-right span {
+  white-space: nowrap;
 }
 
 .hud-right strong {
-  font-size: 16px;
+  font-size: 13px;
 }
 
 .hud-right strong.good {
@@ -87,8 +101,7 @@ canvas {
   border: 1px solid #7dffb3;
   padding: 6px 14px;
   letter-spacing: 0.16em;
-  font: inherit;
-  font-weight: 700;
+  font: 700 13px system-ui, sans-serif;
   cursor: pointer;
 }
 
