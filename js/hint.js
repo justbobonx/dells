@@ -274,6 +274,44 @@ Hint.prototype.tryLevel3 = function () {
   return this.applyPrints(batches[0]);
 };
 
+Hint.prototype.cellKey = function (cell) {
+  return cell.row + "," + cell.col;
+};
+
+Hint.prototype.orthoTouch = function (a, b) {
+  return Math.abs(a.row - b.row) + Math.abs(a.col - b.col) === 1;
+};
+
+Hint.prototype.growGroup = function (hintable, want) {
+  if (hintable.length < 2 || want < 2) return [];
+  const pool = hintable.slice();
+  this.shuffle(pool);
+  for (let s = 0; s < pool.length; s++) {
+    const group = [pool[s]];
+    const seen = {};
+    seen[this.cellKey(pool[s])] = true;
+    const edge = [pool[s]];
+    while (group.length < want && edge.length) {
+      const cur = edge.shift();
+      const nbs = [];
+      for (let i = 0; i < pool.length; i++) {
+        if (this.orthoTouch(cur, pool[i])) nbs.push(pool[i]);
+      }
+      this.shuffle(nbs);
+      for (let i = 0; i < nbs.length; i++) {
+        const k = this.cellKey(nbs[i]);
+        if (seen[k]) continue;
+        seen[k] = true;
+        group.push(nbs[i]);
+        edge.push(nbs[i]);
+        if (group.length >= want) break;
+      }
+    }
+    if (group.length >= 2) return group.slice(0, Math.min(want, group.length));
+  }
+  return [];
+};
+
 Hint.prototype.tryLevel4 = function () {
   const dells = this.dellMap();
   const ranks = [];
@@ -288,30 +326,23 @@ Hint.prototype.tryLevel4 = function () {
       if (cell.spriteId !== "o") hintable.push(cell);
     }
     const keep = empty.length - 2;
-    if (keep < 1 || !hintable.length) continue;
-    const take = Math.min(3, hintable.length, keep);
+    if (keep < 1) continue;
+    const want = Math.min(3, hintable.length, keep);
+    if (want < 2) continue;
+    const group = this.growGroup(hintable, want);
+    if (group.length < 2) continue;
     ranks.push({
-      unknown: empty.length,
       size: cells.length,
-      take: take,
-      hintable: hintable,
+      unknown: empty.length,
+      group: group,
     });
   }
   ranks.sort(function (a, b) {
-    if (b.unknown !== a.unknown) return b.unknown - a.unknown;
-    return b.size - a.size;
+    if (a.size !== b.size) return a.size - b.size;
+    return a.unknown - b.unknown;
   });
-  let pick = null;
-  for (let i = 0; i < ranks.length; i++) {
-    if (ranks[i].take >= 2) {
-      pick = ranks[i];
-      break;
-    }
-  }
-  if (!pick) pick = ranks[0] || null;
-  if (!pick) return 0;
-  this.shuffle(pick.hintable);
-  return this.applyPrints(pick.hintable.slice(0, pick.take));
+  if (!ranks.length) return 0;
+  return this.applyPrints(ranks[0].group);
 };
 
 Hint.prototype.apply = function () {
