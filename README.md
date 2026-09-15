@@ -6,9 +6,11 @@ Larger boards grow extra field features. Those cells have their own rules; the b
 
 ## Play
 
-Single HTML page. Tap a grass cell for an X, tap again to clear, double-tap for a fox. CHECK locks correct foxes in green and outlines misses in red. Win when every fox is right.
+Single HTML page. Tap a grass cell for an X, tap again to clear, double-tap for a fox.
 
-MENU has RESET, NEW, size − / +, and a HINT stub. Score (cleared / right / wrong) and the current board persist in the browser. Leaving the page returns to the title so the next Start can go fullscreen again.
+The bottom-right button is HINT while fewer than N foxes are marked, and CHECK once N are down. Both first score the marked foxes (green lock / red miss). HINT then locks missed empty cells as paw prints: first the easy paint from a found fox (row, column, dell, or ring), then strip / two-line / small-dell halo logic, then a small group from the answer key that will not finish a dell. CHECK with N marks only scores and can win.
+
+MENU has RESET, NEW, size − / +, and the same HINT path. Score (cleared / right / wrong) and the current board persist in the browser. Leaving the page returns to the title so the next Start can go fullscreen again.
 
 ## Run
 
