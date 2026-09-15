@@ -92,8 +92,24 @@ function showMenu() {
   elMenu.hidden = false;
 }
 
+function isClearedGrid(g) {
+  if (!g) return false;
+  let locked = 0;
+  for (let r = 0; r < g.n; r++) {
+    for (let c = 0; c < g.n; c++) {
+      const cell = g.at(r, c);
+      if (cell.spriteId === "o" && cell.locked) locked++;
+    }
+  }
+  return locked === g.n;
+}
+
 function persistBoard() {
   if (!playing || !grid) return;
+  if (isClearedGrid(grid)) {
+    Save.clearBoard();
+    return;
+  }
   Save.writeBoard(grid.dump());
 }
 
@@ -151,11 +167,24 @@ function restoreBoard() {
   if (!data) return false;
   const loaded = Grid.load(data);
   if (!loaded) return false;
+  if (isClearedGrid(loaded)) {
+    Save.clearBoard();
+    return false;
+  }
   grid = loaded;
   n = grid.n;
   Save.writeSize(n);
   showBoard();
   return true;
+}
+
+function showTitle() {
+  if (playing) persistBoard();
+  playing = false;
+  hideWin();
+  hideMenu();
+  playChrome.leave();
+  elStart.hidden = false;
 }
 
 function beginPlay() {
@@ -402,10 +431,10 @@ window.addEventListener("resize", function () {
 });
 
 document.addEventListener("visibilitychange", function () {
-  if (document.visibilityState === "hidden") persistBoard();
+  if (document.visibilityState === "hidden") showTitle();
 });
 
-window.addEventListener("pagehide", persistBoard);
+window.addEventListener("pagehide", showTitle);
 
 setLevel(n);
 paintScore();
