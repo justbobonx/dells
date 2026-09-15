@@ -11,7 +11,7 @@ function Solver(grid) {
     for (let c = 0; c < this.n; c++) {
       const cell = grid.at(r, c);
       row.push(cell.dellId);
-      block.push(!!cell.pond || !!cell.wolf || grid.nearWolf(r, c));
+      block.push(!!cell.pond || !!cell.bunny || !!cell.wolf || grid.nearWolf(r, c));
     }
     this.dells.push(row);
     this.blocked.push(block);
