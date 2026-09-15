@@ -117,12 +117,19 @@ function persistScore() {
   Save.writeScore(score);
 }
 
+function paintCheckLabel() {
+  const marked = grid ? grid.guessOCount() : 0;
+  const size = grid ? grid.n : n;
+  btnCheck.textContent = marked >= size ? "CHECK" : "HINT";
+}
+
 function paintScore() {
   elCleared.textContent = String(score.cleared);
   elRights.textContent = String(score.rights);
   elWrongs.textContent = String(score.wrongs);
   if (grid) elOs.textContent = grid.guessOCount() + "/" + grid.n;
   else elOs.textContent = "0/" + n;
+  paintCheckLabel();
 }
 
 function showBoard() {
@@ -159,8 +166,55 @@ function resetBoard() {
   draw();
 }
 
+function applyCheckStep() {
+  const result = grid.checkGuesses();
+  score.rights += result.rights;
+  score.wrongs += result.wrongs;
+  if (result.win) {
+    score.cleared += 1;
+    Save.clearBoard();
+    elWin.hidden = false;
+  }
+  persistScore();
+  return result;
+}
+
+function finishBoardAction(persist) {
+  if (persist) persistBoard();
+  paintScore();
+  draw();
+}
+
+function onCheckHint() {
+  if (!playing || !grid || menuOpen()) return;
+  const checkMode = grid.guessOCount() >= grid.n;
+  const result = applyCheckStep();
+  if (result.win) {
+    finishBoardAction(false);
+    return;
+  }
+  if (checkMode || result.wrongs > 0) {
+    finishBoardAction(true);
+    return;
+  }
+  new Hint(grid).apply();
+  finishBoardAction(true);
+}
+
 function giveHint() {
   if (!playing || !grid) return;
+  hideMenu();
+  const result = applyCheckStep();
+  if (result.win) {
+    finishBoardAction(false);
+    return;
+  }
+  if (result.wrongs > 0) {
+    finishBoardAction(true);
+    return;
+  }
+  new Hint(grid).apply();
+  finishBoardAction(true);
 }
 
 function restoreBoard() {
@@ -277,23 +331,6 @@ function onBoardPointer(e) {
   }, TAP_MS);
 }
 
-function checkBoard() {
-  if (!playing || !grid || menuOpen()) return;
-  const result = grid.checkGuesses();
-  score.rights += result.rights;
-  score.wrongs += result.wrongs;
-  if (result.win) {
-    score.cleared += 1;
-    Save.clearBoard();
-    elWin.hidden = false;
-  } else {
-    persistBoard();
-  }
-  persistScore();
-  paintScore();
-  draw();
-}
-
 btnStart.addEventListener("click", beginPlay);
 btnMenu.addEventListener("click", function () {
   if (!playing) return;
@@ -301,10 +338,7 @@ btnMenu.addEventListener("click", function () {
   else showMenu();
 });
 btnReset.addEventListener("click", resetBoard);
-btnHint.addEventListener("click", function () {
-  hideMenu();
-  giveHint();
-});
+btnHint.addEventListener("click", giveHint);
 btnNewMinus.addEventListener("click", function () {
   if (!playing) return;
   setLevel(n - 1);
@@ -323,7 +357,7 @@ btnWinNew.addEventListener("click", function () {
   if (!playing) return;
   newBoard();
 });
-btnCheck.addEventListener("click", checkBoard);
+btnCheck.addEventListener("click", onCheckHint);
 elMenu.addEventListener("click", function (e) {
   if (e.target === elMenu) hideMenu();
 });
